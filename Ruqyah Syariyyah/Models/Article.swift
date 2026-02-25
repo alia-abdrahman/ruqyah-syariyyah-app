@@ -52,7 +52,7 @@ struct Article: Identifiable, Codable, Hashable {
     var formattedDate: String? {
         guard let date = publishedDate else { return nil }
         let formatter = DateFormatter()
-        formatter.dateStyle = .medium
+        formatter.dateFormat = "dd MMM yyyy"
         return formatter.string(from: date)
     }
 }

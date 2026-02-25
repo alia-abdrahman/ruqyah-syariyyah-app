@@ -73,65 +73,46 @@ class ArticlesViewModel: ObservableObject {
 
     // MARK: - Sample Data
     private var sampleArticles: [Article] {
-        [
+        // Create specific dates for articles
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd MMM yyyy"
+
+        let date1 = dateFormatter.date(from: "01 Jan 2024") ?? Date()
+        let date2 = dateFormatter.date(from: "15 Jan 2024") ?? Date()
+        let date3 = dateFormatter.date(from: "22 Jan 2024") ?? Date()
+
+        return [
             Article(
                 id: "1",
-                title: "Understanding Ruqyah Syar'iyyah",
-                content: """
-                Ruqyah Syar'iyyah is the Islamic practice of spiritual healing through recitation of Quranic verses and authentic supplications from the Sunnah.
-
-                The word 'Ruqyah' comes from the Arabic root that means to recite protective words or prayers. It has been practiced since the time of the Prophet Muhammad (peace be upon him) and is considered a form of treatment for spiritual ailments.
-
-                Key principles of authentic Ruqyah:
-                1. Must be from the Quran or authentic supplications
-                2. Must be in Arabic or understood by the practitioner
-                3. Must be believed to be a means of cure, not the cure itself
-                4. Must not contain any shirk (associating partners with Allah)
-
-                The Prophet (peace be upon him) encouraged the use of Ruqyah and practiced it himself.
-                """,
+                title: "What is Ruqyah?",
+                content: "Ruqyah is an Islamic practice of healing through the recitation of Quran and supplications. It is a means of seeking cure and protection from Allah. The practice involves reciting specific verses from the Quran and authentic duas (supplications) from the Sunnah. It has been practiced since the time of Prophet Muhammad (peace be upon him) and is considered a legitimate form of treatment for spiritual and physical ailments.",
                 language: "en",
-                category: "Education",
-                publishedDate: Date()
+                category: "Basics",
+                publishedDate: date1
             ),
             Article(
                 id: "2",
-                title: "Benefits of Daily Adhkar",
-                content: """
-                Daily remembrance of Allah (Adhkar) provides protection and spiritual benefits for the believer.
-
-                Morning and evening adhkar are particularly important as they provide a shield of protection throughout the day and night.
-
-                Some key benefits include:
-                - Protection from evil eye and envy
-                - Spiritual peace and tranquility
-                - Strengthening of faith
-                - Connection with Allah
-
-                The Prophet (peace be upon him) was consistent in his daily adhkar and encouraged his companions to be likewise.
-                """,
+                title: "Benefits of Regular Ruqyah",
+                content: "Regular practice of Ruqyah brings numerous spiritual and psychological benefits: strengthening connection with Allah, protection from evil eye and envy, spiritual peace and tranquility, increased faith and reliance on Allah, and mental clarity. The consistent recitation of Quranic verses provides a shield of protection and helps maintain spiritual wellbeing.",
                 language: "en",
-                category: "Practice",
-                publishedDate: Date().addingTimeInterval(-86400)
+                category: "Benefits",
+                publishedDate: date2
             ),
             Article(
                 id: "3",
-                title: "The Power of Surah Al-Fatihah",
-                content: """
-                Surah Al-Fatihah is known as the greatest surah in the Quran and is also called 'The Healer' (Ash-Shifa).
-
-                The Prophet (peace be upon him) said: "By Him in whose hand my soul is, nothing like it has been revealed in the Torah, the Gospel, the Psalms, or the Quran."
-
-                This surah is particularly powerful for Ruqyah because:
-                - It praises Allah and acknowledges His sovereignty
-                - It asks for guidance to the straight path
-                - It was used by the companions for healing
-
-                Reciting Al-Fatihah regularly provides spiritual protection and healing.
-                """,
+                title: "How to Perform Self-Ruqyah",
+                content: "Self-Ruqyah is the practice of performing spiritual healing on oneself. Start with purification (wudu), find a quiet place, recite Al-Fatihah, Ayatul Kursi, and the last three surahs of the Quran. Blow gently over your hands and wipe them over your body. Maintain sincerity and trust in Allah as the ultimate healer. This can be done regularly for protection and healing.",
                 language: "en",
-                category: "Quran",
-                publishedDate: Date().addingTimeInterval(-172800)
+                category: "Basics",
+                publishedDate: date3
+            ),
+            Article(
+                id: "4",
+                title: "Protection Through Morning Adhkar",
+                content: "Morning remembrance (adhkar) provides a shield of protection throughout the day. The Prophet (peace be upon him) encouraged reciting specific supplications after Fajr prayer. These include Ayatul Kursi, the last verses of Surah Al-Baqarah, and various authentic duas. Consistent practice strengthens spiritual immunity and brings peace to the heart.",
+                language: "en",
+                category: "Benefits",
+                publishedDate: Date()
             )
         ]
     }

@@ -14,13 +14,13 @@ struct MainTabView: View {
     enum Tab: String, CaseIterable {
         case library = "Library"
         case tracking = "Tracking"
-        case settings = "Settings"
+        case articles = "Articles"
 
         var icon: String {
             switch self {
-            case .library: return "book.fill"
-            case .tracking: return "chart.bar.fill"
-            case .settings: return "gearshape.fill"
+            case .library: return "text.book.closed.fill"
+            case .tracking: return "calendar"
+            case .articles: return "doc.text.fill"
             }
         }
     }
@@ -40,10 +40,10 @@ struct MainTabView: View {
                         Label(Tab.tracking.rawValue, systemImage: Tab.tracking.icon)
                     }
 
-                SettingsView()
-                    .tag(Tab.settings)
+                ArticlesView()
+                    .tag(Tab.articles)
                     .tabItem {
-                        Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
+                        Label(Tab.articles.rawValue, systemImage: Tab.articles.icon)
                     }
             }
             .tint(.primaryGreen)
