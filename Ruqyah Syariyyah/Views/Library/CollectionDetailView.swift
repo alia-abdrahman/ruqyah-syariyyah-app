@@ -21,7 +21,7 @@ struct CollectionDetailView: View {
 
                         VStack(alignment: .leading, spacing: 8) {
                             Spacer()
-                                .frame(height: geometry.safeAreaInsets.top + 56)
+                                .frame(height: geometry.safeAreaInsets.top + 100)
 
                             // Title
                             Text(collection.name)
@@ -60,7 +60,7 @@ struct CollectionDetailView: View {
                         .padding(.bottom, 20)
                     }
                 }
-                .frame(height: 260)
+                .frame(height: 300)
 
                 VStack(spacing: AppConstants.spacingMedium) {
                     // Description Card
