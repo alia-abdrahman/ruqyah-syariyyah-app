@@ -15,12 +15,14 @@ struct MainTabView: View {
         case library = "Library"
         case tracking = "Tracking"
         case articles = "Articles"
+        case settings = "Settings"
 
         var icon: String {
             switch self {
             case .library: return "text.book.closed.fill"
             case .tracking: return "calendar"
             case .articles: return "doc.text.fill"
+            case .settings: return "gearshape.fill"
             }
         }
     }
@@ -44,6 +46,12 @@ struct MainTabView: View {
                     .tag(Tab.articles)
                     .tabItem {
                         Label(Tab.articles.rawValue, systemImage: Tab.articles.icon)
+                    }
+
+                SettingsView()
+                    .tag(Tab.settings)
+                    .tabItem {
+                        Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
                     }
             }
             .tint(.primaryGreen)
