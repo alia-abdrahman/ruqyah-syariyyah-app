@@ -3,15 +3,18 @@ import SwiftUI
 struct GradientHeader<Content: View>: View {
     let title: String
     let subtitle: String?
+    let showBackButton: Bool
     let content: () -> Content
 
     init(
         title: String,
         subtitle: String? = nil,
+        showBackButton: Bool = false,
         @ViewBuilder content: @escaping () -> Content = { EmptyView() }
     ) {
         self.title = title
         self.subtitle = subtitle
+        self.showBackButton = showBackButton
         self.content = content
     }
 
@@ -25,8 +28,9 @@ struct GradientHeader<Content: View>: View {
                 )
 
                 VStack(alignment: .leading, spacing: 8) {
+                    // Add extra padding when back button is shown (detail views)
                     Spacer()
-                        .frame(height: geometry.safeAreaInsets.top + 16)
+                        .frame(height: geometry.safeAreaInsets.top + (showBackButton ? 44 : 16))
 
                     Text(title)
                         .font(.poppins(28, weight: .bold))

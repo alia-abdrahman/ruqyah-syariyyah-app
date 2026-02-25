@@ -20,7 +20,8 @@ struct GroupDetailView: View {
                 // Header
                 GradientHeader(
                     title: group.name,
-                    subtitle: "\(group.verseCount) verses"
+                    subtitle: "\(group.verseCount) verses",
+                    showBackButton: true
                 ) {
                     HStack(spacing: AppConstants.spacingMedium) {
                         Button {
@@ -51,7 +52,7 @@ struct GroupDetailView: View {
                     }
                     .padding(.top, AppConstants.spacingSmall)
                 }
-                .frame(height: 180)
+                .frame(height: 200)
 
                 // Verses
                 LazyVStack(spacing: AppConstants.spacingMedium) {

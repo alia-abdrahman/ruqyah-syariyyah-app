@@ -11,21 +11,20 @@ struct CollectionDetailView: View {
         ScrollView {
             VStack(spacing: 0) {
                 // Header
-                ZStack(alignment: .topLeading) {
-                    GradientHeader(
-                        title: collection.name,
-                        subtitle: collection.description
-                    ) {
-                        HStack(spacing: AppConstants.spacingMedium) {
-                            Label("\(collection.groupCount) groups", systemImage: "folder")
-                            Label("\(collection.totalVerseCount) verses", systemImage: "text.quote")
-                        }
-                        .font(.bodySmall)
-                        .foregroundColor(.white.opacity(0.8))
-                        .padding(.top, AppConstants.spacingSmall)
+                GradientHeader(
+                    title: collection.name,
+                    subtitle: collection.description,
+                    showBackButton: true
+                ) {
+                    HStack(spacing: AppConstants.spacingMedium) {
+                        Label("\(collection.groupCount) groups", systemImage: "folder")
+                        Label("\(collection.totalVerseCount) verses", systemImage: "text.quote")
                     }
-                    .frame(height: 200)
+                    .font(.bodySmall)
+                    .foregroundColor(.white.opacity(0.8))
+                    .padding(.top, AppConstants.spacingSmall)
                 }
+                .frame(height: 220)
 
                 // Groups List
                 VStack(spacing: AppConstants.spacingMedium) {
