@@ -29,12 +29,12 @@ struct GradientHeader<Content: View>: View {
                         .frame(height: geometry.safeAreaInsets.top + 16)
 
                     Text(title)
-                        .font(.system(size: 28, weight: .bold))
+                        .font(.poppins(28, weight: .bold))
                         .foregroundColor(.white)
 
                     if let sub = subtitle {
                         Text(sub)
-                            .font(.subheadline)
+                            .font(.poppins(14, weight: .regular))
                             .foregroundColor(.white.opacity(0.85))
                     }
 

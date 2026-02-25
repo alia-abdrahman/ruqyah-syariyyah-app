@@ -23,11 +23,11 @@ struct ArticlesView: View {
                                         .frame(height: geometry.safeAreaInsets.top + 16)
 
                                     Text("Articles")
-                                        .font(.system(size: 28, weight: .bold))
+                                        .font(.poppins(28, weight: .bold))
                                         .foregroundColor(.white)
 
                                     Text("Learn and expand your knowledge")
-                                        .font(.subheadline)
+                                        .font(.poppins(14, weight: .regular))
                                         .foregroundColor(.white.opacity(0.85))
                                 }
 
@@ -40,7 +40,7 @@ struct ArticlesView: View {
                                         .frame(width: 56, height: 56)
 
                                     Image(systemName: "globe")
-                                        .font(.system(size: 24))
+                                        .font(.system(size: 24, weight: .regular))
                                         .foregroundColor(.white)
                                 }
                                 .padding(.top, geometry.safeAreaInsets.top)
@@ -60,7 +60,7 @@ struct ArticlesView: View {
                                         viewModel.selectedCategory = category
                                     } label: {
                                         Text(category)
-                                            .font(.system(size: 14, weight: .medium))
+                                            .font(.poppins(14, weight: .medium))
                                             .foregroundColor(viewModel.selectedCategory == category ? .white : .textSecondary)
                                             .padding(.horizontal, 20)
                                             .padding(.vertical, 10)
@@ -144,7 +144,7 @@ struct ArticleCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     // Title
                     Text(article.title)
-                        .font(.system(size: 17, weight: .semibold))
+                        .font(.poppins(17, weight: .semibold))
                         .foregroundColor(.adaptiveText(colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -152,7 +152,7 @@ struct ArticleCard: View {
                     // Category and Date
                     HStack(spacing: 8) {
                         Text(article.category)
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.poppins(12, weight: .medium))
                             .foregroundColor(.primaryGreen)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -161,7 +161,7 @@ struct ArticleCard: View {
 
                         if let date = article.formattedDate {
                             Text(date)
-                                .font(.system(size: 12))
+                                .font(.poppins(12, weight: .regular))
                                 .foregroundColor(.textSecondary)
                         }
                     }
@@ -181,7 +181,7 @@ struct ArticleCard: View {
 
             // Description
             Text(article.content)
-                .font(.system(size: 14))
+                .font(.poppins(14, weight: .regular))
                 .foregroundColor(.textSecondary)
                 .lineLimit(3)
                 .multilineTextAlignment(.leading)
@@ -192,7 +192,7 @@ struct ArticleCard: View {
                 Spacer()
                 HStack(spacing: 4) {
                     Text("Read more")
-                        .font(.system(size: 14, weight: .medium))
+                        .font(.poppins(14, weight: .medium))
                     Image(systemName: "arrow.right")
                         .font(.system(size: 12, weight: .medium))
                 }

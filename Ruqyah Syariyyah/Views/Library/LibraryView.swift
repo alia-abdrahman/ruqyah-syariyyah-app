@@ -79,7 +79,7 @@ struct LibraryView: View {
     private var welcomeBanner: some View {
         HStack(spacing: 16) {
             Text("Begin your Islamic spiritual healing by recitations of holy verses of the Quran.")
-                .font(.system(size: 16, weight: .medium))
+                .font(.poppins(16, weight: .medium))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
@@ -92,7 +92,7 @@ struct LibraryView: View {
                     .frame(width: 70, height: 70)
 
                 Image(systemName: "book.fill")
-                    .font(.system(size: 28))
+                    .font(.system(size: 28, weight: .regular))
                     .foregroundColor(.white)
             }
         }

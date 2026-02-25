@@ -33,7 +33,7 @@ struct TrackingView: View {
                                 if trackingViewModel.isSessionActive {
                                     // Active Session
                                     Text("Session in Progress")
-                                        .font(.subheadline)
+                                        .font(.poppins(14, weight: .regular))
                                         .foregroundColor(.white.opacity(0.85))
 
                                     Text(trackingViewModel.elapsedTimeFormatted)
@@ -45,7 +45,7 @@ struct TrackingView: View {
                                             trackingViewModel.cancelSession()
                                         } label: {
                                             Label("Cancel", systemImage: "xmark")
-                                                .font(.subheadline.weight(.medium))
+                                                .font(.poppins(14, weight: .medium))
                                                 .foregroundColor(.white)
                                                 .padding(.horizontal, 20)
                                                 .padding(.vertical, 10)
@@ -59,7 +59,7 @@ struct TrackingView: View {
                                             }
                                         } label: {
                                             Label("End", systemImage: "checkmark")
-                                                .font(.subheadline.weight(.medium))
+                                                .font(.poppins(14, weight: .medium))
                                                 .foregroundColor(.primaryGreen)
                                                 .padding(.horizontal, 20)
                                                 .padding(.vertical, 10)
@@ -70,18 +70,18 @@ struct TrackingView: View {
                                 } else {
                                     // Start Session
                                     Text("Track Your Practice")
-                                        .font(.system(size: 28, weight: .bold))
+                                        .font(.poppins(28, weight: .bold))
                                         .foregroundColor(.white)
 
                                     Text("Build consistency with daily sessions")
-                                        .font(.subheadline)
+                                        .font(.poppins(14, weight: .regular))
                                         .foregroundColor(.white.opacity(0.85))
 
                                     Button {
                                         showStartSession = true
                                     } label: {
                                         Label("Start Session", systemImage: "play.fill")
-                                            .font(.subheadline.weight(.semibold))
+                                            .font(.poppins(14, weight: .semibold))
                                             .foregroundColor(.primaryGreen)
                                             .padding(.horizontal, 24)
                                             .padding(.vertical, 12)
