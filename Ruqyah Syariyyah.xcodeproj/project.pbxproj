@@ -7,12 +7,25 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		0BA808032F4EB4A300A7C64D /* Ruqyah Syariyyah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ruqyah Syariyyah.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		0BA809822F4EBA3A00A7C64D /* Ruqyah Syariyyah.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ruqyah Syariyyah.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		0BA809902F4EBB0000A7C64D /* Exceptions for "Ruqyah Syariyyah" folder in "Ruqyah Syariyyah" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 0BA808022F4EB4A300A7C64D /* Ruqyah Syariyyah */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		0BA808052F4EB4A300A7C64D /* Ruqyah Syariyyah */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				0BA809902F4EBB0000A7C64D /* Exceptions for "Ruqyah Syariyyah" folder in "Ruqyah Syariyyah" target */,
+			);
 			path = "Ruqyah Syariyyah";
 			sourceTree = "<group>";
 		};
@@ -33,16 +46,8 @@
 			isa = PBXGroup;
 			children = (
 				0BA808052F4EB4A300A7C64D /* Ruqyah Syariyyah */,
-				0BA808042F4EB4A300A7C64D /* Products */,
+				0BA809822F4EBA3A00A7C64D /* Ruqyah Syariyyah.app */,
 			);
-			sourceTree = "<group>";
-		};
-		0BA808042F4EB4A300A7C64D /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				0BA808032F4EB4A300A7C64D /* Ruqyah Syariyyah.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -67,7 +72,7 @@
 			packageProductDependencies = (
 			);
 			productName = "Ruqyah Syariyyah";
-			productReference = 0BA808032F4EB4A300A7C64D /* Ruqyah Syariyyah.app */;
+			productReference = 0BA809822F4EBA3A00A7C64D /* Ruqyah Syariyyah.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -95,7 +100,7 @@
 			mainGroup = 0BA807FA2F4EB4A300A7C64D;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 0BA808042F4EB4A300A7C64D /* Products */;
+			productRefGroup = 0BA807FA2F4EB4A300A7C64D;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -177,7 +182,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -234,7 +239,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -251,8 +256,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VAVKLQRAZ8;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Ruqyah Syariyyah/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -282,8 +289,10 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VAVKLQRAZ8;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Ruqyah Syariyyah/Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
