@@ -80,7 +80,7 @@ struct GroupDetailView: View {
                     }
                 }
                 .padding(.horizontal, AppConstants.spacingMedium)
-                .padding(.top, AppConstants.spacingLarge)
+                .padding(.top, 32)
                 .padding(.bottom, AppConstants.spacingMedium)
             }
         }
