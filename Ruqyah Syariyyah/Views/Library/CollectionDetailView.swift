@@ -90,6 +90,7 @@ struct CollectionDetailView: View {
         .background(Color.adaptiveBackground(colorScheme))
         .ignoresSafeArea(edges: .top)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
