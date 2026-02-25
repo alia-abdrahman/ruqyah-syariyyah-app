@@ -79,7 +79,9 @@ struct GroupDetailView: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .padding(AppConstants.spacingMedium)
+                .padding(.horizontal, AppConstants.spacingMedium)
+                .padding(.top, AppConstants.spacingLarge)
+                .padding(.bottom, AppConstants.spacingMedium)
             }
         }
         .background(Color.adaptiveBackground(colorScheme))
