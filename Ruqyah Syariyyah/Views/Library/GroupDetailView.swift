@@ -52,7 +52,7 @@ struct GroupDetailView: View {
                     }
                     .padding(.top, AppConstants.spacingSmall)
                 }
-                .frame(height: 200)
+                .frame(height: 240)
 
                 // Verses
                 LazyVStack(spacing: AppConstants.spacingMedium) {
@@ -80,7 +80,7 @@ struct GroupDetailView: View {
                     }
                 }
                 .padding(.horizontal, AppConstants.spacingMedium)
-                .padding(.top, 32)
+                .padding(.top, 48)
                 .padding(.bottom, AppConstants.spacingMedium)
             }
         }
