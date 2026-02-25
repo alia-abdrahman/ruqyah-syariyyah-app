@@ -30,7 +30,7 @@ struct GradientHeader<Content: View>: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Add extra padding when back button is shown (detail views)
                     Spacer()
-                        .frame(height: geometry.safeAreaInsets.top + (showBackButton ? 44 : 16))
+                        .frame(height: geometry.safeAreaInsets.top + (showBackButton ? 24 : 16))
 
                     Text(title)
                         .font(.poppins(28, weight: .bold))
