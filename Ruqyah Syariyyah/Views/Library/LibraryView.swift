@@ -78,7 +78,7 @@ struct LibraryView: View {
     // MARK: - Welcome Banner
     private var welcomeBanner: some View {
         HStack(spacing: 16) {
-            Text("Begin your Islamic spiritual healing with ruqyah recitation of the Holy Quran.")
+            Text("Begin your Islamic spiritual healing by recitations of holy verses of the Quran.")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
