@@ -1,21 +1,24 @@
 import SwiftUI
 
-struct GradientHeader<Content: View>: View {
+struct GradientHeader<Content: View, TrailingContent: View>: View {
     let title: String
     let subtitle: String?
     let showBackButton: Bool
     let content: () -> Content
+    let trailingContent: () -> TrailingContent
 
     init(
         title: String,
         subtitle: String? = nil,
         showBackButton: Bool = false,
-        @ViewBuilder content: @escaping () -> Content = { EmptyView() }
+        @ViewBuilder content: @escaping () -> Content = { EmptyView() },
+        @ViewBuilder trailingContent: @escaping () -> TrailingContent = { EmptyView() }
     ) {
         self.title = title
         self.subtitle = subtitle
         self.showBackButton = showBackButton
         self.content = content
+        self.trailingContent = trailingContent
     }
 
     var body: some View {
@@ -30,11 +33,18 @@ struct GradientHeader<Content: View>: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Add extra padding when back button is shown (detail views)
                     Spacer()
-                        .frame(height: geometry.safeAreaInsets.top + (showBackButton ? 100 : 16))
+                        .frame(height: geometry.safeAreaInsets.top + (showBackButton ? 100 : 44))
 
-                    Text(title)
-                        .font(.poppins(28, weight: .bold))
-                        .foregroundColor(.white)
+                    // Title row with trailing content
+                    HStack(alignment: .center) {
+                        Text(title)
+                            .font(.poppins(28, weight: .bold))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        trailingContent()
+                    }
 
                     if let sub = subtitle {
                         Text(sub)
@@ -46,7 +56,7 @@ struct GradientHeader<Content: View>: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 20)
-                .padding(.bottom, 16)
+                .padding(.bottom, 5)
             }
         }
     }

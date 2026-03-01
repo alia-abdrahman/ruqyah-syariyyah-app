@@ -5,153 +5,185 @@ struct MushafView: View {
 
     @EnvironmentObject var contentViewModel: ContentViewModel
     @EnvironmentObject var settingsViewModel: SettingsViewModel
+    @EnvironmentObject var audioPlayerViewModel: AudioPlayerViewModel
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
-    @State private var currentIndex: Int = 0
-    @State private var showTranslation: Bool = true
+    // Get group name from first verse
+    private var groupName: String {
+        verses.first?.group ?? "Verses"
+    }
 
     var body: some View {
         NavigationStack {
-            GeometryReader { geometry in
-                TabView(selection: $currentIndex) {
-                    ForEach(Array(verses.enumerated()), id: \.offset) { index, verse in
-                        versePageView(verse, geometry: geometry)
-                            .tag(index)
-                    }
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-                .background(Color.adaptiveBackground(colorScheme))
-            }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.adaptiveText(colorScheme))
-                    }
-                }
+            ZStack(alignment: .bottom) {
+                VStack(spacing: 0) {
+                    // Green Header Bar with Icons
+                    HStack {
+                        // Close button
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
 
-                ToolbarItem(placement: .principal) {
-                    Text("\(currentIndex + 1) / \(verses.count)")
-                        .font(.bodyMedium)
-                        .foregroundColor(.textSecondary)
-                }
+                        Spacer()
 
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showTranslation.toggle()
-                    } label: {
-                        Image(systemName: showTranslation ? "text.bubble.fill" : "text.bubble")
-                            .foregroundColor(.primaryGreen)
-                    }
-                }
-            }
-            .safeAreaInset(edge: .bottom) {
-                // Page Navigation
-                HStack {
-                    Button {
-                        if currentIndex > 0 {
-                            withAnimation {
-                                currentIndex -= 1
+                        // List icon - return to verse-by-verse view
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "list.bullet")
+                                .font(.system(size: 18, weight: .medium))
+                                .foregroundColor(.white)
+                        }
+
+                        Spacer()
+                            .frame(width: 20)
+
+                        // Play button
+                        Button {
+                            playAllVerses()
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 36, height: 36)
+
+                                Image(systemName: "play.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primaryGreen)
                             }
                         }
-                    } label: {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(currentIndex > 0 ? .primaryGreen : .textSecondary.opacity(0.3))
                     }
-                    .disabled(currentIndex == 0)
+                    .padding(.horizontal, AppConstants.spacingMedium)
+                    .padding(.vertical, 12)
+                    .background(Color.primaryGreen)
 
-                    Spacer()
+                    ScrollView {
+                        VStack(spacing: AppConstants.spacingMedium) {
+                            // Title Card
+                            Text(groupName)
+                                .font(.poppins(22, weight: .semibold))
+                                .foregroundColor(.primaryGreen)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 20)
+                                .background(Color.adaptiveSurface(colorScheme))
+                                .cornerRadius(AppConstants.radiusLarge)
+                                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                                .padding(.horizontal, AppConstants.spacingMedium)
 
-                    // Page Dots (max 10 visible)
-                    HStack(spacing: 6) {
-                        let start = max(0, min(currentIndex - 4, verses.count - 10))
-                        let end = min(start + 10, verses.count)
-
-                        ForEach(start..<end, id: \.self) { index in
-                            Circle()
-                                .fill(index == currentIndex ? Color.primaryGreen : Color.textSecondary.opacity(0.3))
-                                .frame(width: 8, height: 8)
-                        }
-                    }
-
-                    Spacer()
-
-                    Button {
-                        if currentIndex < verses.count - 1 {
-                            withAnimation {
-                                currentIndex += 1
+                            // Arabic Text Card - All verses combined
+                            VStack(spacing: 0) {
+                                // Combined Arabic text with verse numbers
+                                combinedArabicText
+                                    .padding(AppConstants.spacingLarge)
                             }
+                            .background(Color.adaptiveSurface(colorScheme))
+                            .cornerRadius(AppConstants.radiusLarge)
+                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+
+                            // Translation Section
+                            VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
+                                Text("Translation")
+                                    .font(.poppins(20, weight: .bold))
+                                    .foregroundColor(.adaptiveText(colorScheme))
+                                    .padding(.bottom, 4)
+
+                                ForEach(Array(verses.enumerated()), id: \.element.id) { index, verse in
+                                    translationRow(verse: verse, index: index + 1)
+                                }
+                            }
+                            .padding(AppConstants.spacingLarge)
+                            .background(Color.adaptiveSurface(colorScheme))
+                            .cornerRadius(AppConstants.radiusLarge)
+                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.bottom, audioPlayerViewModel.showMiniPlayer ? 80 : AppConstants.spacingXLarge)
                         }
-                    } label: {
-                        Image(systemName: "chevron.right")
-                            .font(.title2)
-                            .foregroundColor(currentIndex < verses.count - 1 ? .primaryGreen : .textSecondary.opacity(0.3))
+                        .padding(.top, AppConstants.spacingMedium)
                     }
-                    .disabled(currentIndex == verses.count - 1)
                 }
-                .padding()
-                .background(Color.adaptiveSurface(colorScheme))
+
+                // Mini Player overlay at bottom
+                if audioPlayerViewModel.showMiniPlayer {
+                    MiniPlayerView()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .background(Color.adaptiveBackground(colorScheme))
+            .navigationBarHidden(true)
+            .animation(.easeInOut(duration: 0.25), value: audioPlayerViewModel.showMiniPlayer)
         }
     }
 
-    @ViewBuilder
-    private func versePageView(_ verse: RuqyahVerse, geometry: GeometryProxy) -> some View {
-        ScrollView {
-            VStack(spacing: AppConstants.spacingLarge) {
-                Spacer()
-                    .frame(height: 20)
+    // MARK: - Play All Verses
+    private func playAllVerses() {
+        guard !verses.isEmpty else { return }
+        // Enable auto-play for Play All mode
+        audioPlayerViewModel.setPlaylist(verses, startIndex: 0, autoPlay: true)
+        audioPlayerViewModel.playVerse(verses[0])
+    }
 
-                // Verse Number
-                if let number = verse.verseNumber {
-                    ZStack {
-                        Image(systemName: "seal.fill")
-                            .font(.system(size: 50))
-                            .foregroundColor(.primaryGreen.opacity(0.15))
+    // MARK: - Combined Arabic Text with Verse Numbers
+    private var combinedArabicText: some View {
+        // Build attributed text with verse numbers
+        let combinedText = verses.enumerated().map { index, verse in
+            let verseNumber = verse.verseNumber ?? toArabicNumeral(index + 1)
+            return "\(verse.arabicText) ﴿\(verseNumber)﴾"
+        }.joined(separator: " ")
 
-                        Text(number)
-                            .font(.amiriQuran(24))
-                            .foregroundColor(.primaryGreen)
-                    }
-                }
+        return Text(combinedText)
+            .font(.amiriQuran(26))
+            .foregroundColor(.adaptiveText(colorScheme))
+            .multilineTextAlignment(.trailing)
+            .lineSpacing(20)
+            .environment(\.layoutDirection, .rightToLeft)
+    }
 
-                // Arabic Text
-                Text(verse.arabicText)
-                    .font(.arabicText(size: settingsViewModel.arabicTextSize + 4))
-                    .foregroundColor(.adaptiveText(colorScheme))
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(20)
-                    .padding(.horizontal, AppConstants.spacingLarge)
+    // MARK: - Translation Row
+    private func translationRow(verse: RuqyahVerse, index: Int) -> some View {
+        HStack(alignment: .top, spacing: AppConstants.spacingMedium) {
+            // Arabic numeral in green circle
+            ZStack {
+                Circle()
+                    .stroke(Color.primaryGreen, lineWidth: 1.5)
+                    .frame(width: 32, height: 32)
 
-                // Translation
-                if showTranslation {
-                    Divider()
-                        .padding(.horizontal, 50)
-
-                    Text(verse.translation(for: contentViewModel.language))
-                        .font(.bodyLarge)
-                        .foregroundColor(.adaptiveSecondaryText(colorScheme))
-                        .multilineTextAlignment(.center)
-                        .lineSpacing(8)
-                        .padding(.horizontal, AppConstants.spacingLarge)
-
-                    if let reference = verse.reference {
-                        Text(reference)
-                            .font(.bodySmall)
-                            .foregroundColor(.primaryGreen)
-                    }
-                }
-
-                Spacer()
-                    .frame(height: 100)
+                Text(toArabicNumeral(index))
+                    .font(.poppins(14, weight: .medium))
+                    .foregroundColor(.primaryGreen)
             }
-            .frame(minHeight: geometry.size.height - 100)
+
+            // Translation text
+            Text(verse.translation(for: contentViewModel.language))
+                .font(.poppins(15, weight: .regular))
+                .foregroundColor(.adaptiveSecondaryText(colorScheme))
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    // MARK: - Helper: Convert to Arabic Numerals
+    private func toArabicNumeral(_ number: Int) -> String {
+        let arabicNumerals = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"]
+        var result = ""
+        var num = number
+
+        if num == 0 {
+            return arabicNumerals[0]
+        }
+
+        while num > 0 {
+            let digit = num % 10
+            result = arabicNumerals[digit] + result
+            num /= 10
+        }
+
+        return result
     }
 }
 
@@ -161,19 +193,36 @@ struct MushafView: View {
             arabicText: "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
             englishTranslation: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
             malayTranslation: "Dengan nama Allah, Yang Maha Pemurah.",
-            group: "Al-Fatihah",
+            group: "Surah Al-Fatihah",
             reference: "Al-Fatihah 1:1",
             verseNumber: "١"
         ),
         RuqyahVerse(
             arabicText: "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَـٰلَمِينَ",
-            englishTranslation: "[All] praise is [due] to Allah, Lord of the worlds",
+            englishTranslation: "[All] praise is [due] to Allah, Lord of the worlds -",
             malayTranslation: "Segala puji tertentu bagi Allah.",
-            group: "Al-Fatihah",
+            group: "Surah Al-Fatihah",
             reference: "Al-Fatihah 1:2",
             verseNumber: "٢"
+        ),
+        RuqyahVerse(
+            arabicText: "ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
+            englishTranslation: "The Entirely Merciful, the Especially Merciful,",
+            malayTranslation: "Yang Maha Pemurah, lagi Maha Mengasihani.",
+            group: "Surah Al-Fatihah",
+            reference: "Al-Fatihah 1:3",
+            verseNumber: "٣"
+        ),
+        RuqyahVerse(
+            arabicText: "مَـٰلِكِ يَوْمِ ٱلدِّينِ",
+            englishTranslation: "Sovereign of the Day of Recompense.",
+            malayTranslation: "Yang Menguasai hari pembalasan.",
+            group: "Surah Al-Fatihah",
+            reference: "Al-Fatihah 1:4",
+            verseNumber: "٤"
         )
     ])
     .environmentObject(ContentViewModel())
     .environmentObject(SettingsViewModel())
+    .environmentObject(AudioPlayerViewModel())
 }

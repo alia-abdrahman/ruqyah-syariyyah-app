@@ -113,17 +113,17 @@ struct VerseDetailView: View {
                         shareVerse()
                     }
 
-                    // Play
-                    if verse.audioPath != nil {
+                    // Play (for local audio or API audio via reference)
+                    if verse.audioPath != nil || verse.reference != nil {
                         ActionButton(
-                            icon: audioPlayerViewModel.currentVerse?.uniqueKey == verse.uniqueKey && audioPlayerViewModel.isPlaying ? "pause.fill" : "play.fill",
-                            title: "Play",
+                            icon: audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying ? "pause.fill" : "play.fill",
+                            title: audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying ? "Pause" : "Play",
                             color: .primaryGreen
                         ) {
-                            if audioPlayerViewModel.currentVerse?.uniqueKey == verse.uniqueKey {
-                                audioPlayerViewModel.togglePlayPause()
+                            if audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying {
+                                audioPlayerViewModel.pause()
                             } else {
-                                audioPlayerViewModel.playVerse(verse)
+                                audioPlayerViewModel.playSingleVerse(verse)
                             }
                         }
                     }
@@ -134,7 +134,21 @@ struct VerseDetailView: View {
         .background(Color.adaptiveBackground(colorScheme))
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle(verse.group)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .fontWeight(.semibold)
+                        Text("Back")
+                            .font(.poppins(16, weight: .regular))
+                    }
+                    .foregroundColor(.primaryGreen)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     shareVerse()

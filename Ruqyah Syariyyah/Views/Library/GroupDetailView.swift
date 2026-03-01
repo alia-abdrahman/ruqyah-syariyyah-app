@@ -15,19 +15,32 @@ struct GroupDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Header
-                GradientHeader(
-                    title: group.name,
-                    subtitle: "\(group.verseCount) verses",
-                    showBackButton: true
-                ) {
-                    HStack(spacing: AppConstants.spacingMedium) {
+        VStack(spacing: 0) {
+            // Static Header
+            GradientHeader(
+                title: group.name,
+                subtitle: "\(group.verseCount) verses",
+                showBackButton: true
+            ) {
+                HStack(spacing: AppConstants.spacingMedium) {
+                    Button {
+                        showMushafView = true
+                    } label: {
+                        Label("Read", systemImage: "book.fill")
+                            .font(.bodySmall)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(AppConstants.radiusSmall)
+                    }
+
+                    // Show Play button if verses have audio (local or API via reference)
+                    if verses.contains(where: { $0.audioPath != nil || $0.reference != nil }) {
                         Button {
-                            showMushafView = true
+                            playAll()
                         } label: {
-                            Label("Read", systemImage: "book.fill")
+                            Label("Listen", systemImage: "play.fill")
                                 .font(.bodySmall)
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 12)
@@ -35,26 +48,14 @@ struct GroupDetailView: View {
                                 .background(Color.white.opacity(0.2))
                                 .cornerRadius(AppConstants.radiusSmall)
                         }
-
-                        if verses.contains(where: { $0.audioPath != nil }) {
-                            Button {
-                                playAll()
-                            } label: {
-                                Label("Play All", systemImage: "play.fill")
-                                    .font(.bodySmall)
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.2))
-                                    .cornerRadius(AppConstants.radiusSmall)
-                            }
-                        }
                     }
-                    .padding(.top, AppConstants.spacingSmall)
                 }
-                .frame(height: 240)
+                .padding(.top, AppConstants.spacingSmall)
+            }
+            .frame(height: 200)
 
-                // Verses
+            // Scrollable Verses
+            ScrollView {
                 LazyVStack(spacing: AppConstants.spacingMedium) {
                     ForEach(verses) { verse in
                         NavigationLink(destination: VerseDetailView(verse: verse)) {
@@ -62,14 +63,19 @@ struct GroupDetailView: View {
                                 verse: verse,
                                 isFavorite: contentViewModel.isFavorite(verse),
                                 language: contentViewModel.language,
+                                isPlaying: audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying,
                                 onFavoriteToggle: {
                                     Task {
                                         await contentViewModel.toggleFavorite(verse)
                                     }
                                 },
                                 onPlay: {
-                                    audioPlayerViewModel.setPlaylist(verses, startIndex: verses.firstIndex(of: verse) ?? 0)
-                                    audioPlayerViewModel.playVerse(verse)
+                                    // Toggle play/pause for this verse
+                                    if audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying {
+                                        audioPlayerViewModel.pause()
+                                    } else {
+                                        audioPlayerViewModel.playSingleVerse(verse)
+                                    }
                                 },
                                 onShare: {
                                     shareVerse(verse)
@@ -80,7 +86,7 @@ struct GroupDetailView: View {
                     }
                 }
                 .padding(.horizontal, AppConstants.spacingMedium)
-                .padding(.top, 48)
+                .padding(.top, AppConstants.spacingMedium)
                 .padding(.bottom, AppConstants.spacingMedium)
             }
         }
@@ -93,9 +99,13 @@ struct GroupDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.white)
-                        .fontWeight(.semibold)
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .fontWeight(.semibold)
+                        Text("Back")
+                            .font(.poppins(16, weight: .regular))
+                    }
+                    .foregroundColor(.white)
                 }
             }
         }
@@ -106,11 +116,11 @@ struct GroupDetailView: View {
     }
 
     private func playAll() {
-        let playableVerses = verses.filter { $0.audioPath != nil }
-        guard !playableVerses.isEmpty else { return }
+        guard !verses.isEmpty else { return }
 
-        audioPlayerViewModel.setPlaylist(playableVerses, startIndex: 0)
-        audioPlayerViewModel.playVerse(playableVerses[0])
+        // Enable auto-play for Play All mode
+        audioPlayerViewModel.setPlaylist(verses, startIndex: 0, autoPlay: true)
+        audioPlayerViewModel.playVerse(verses[0])
     }
 
     private func shareVerse(_ verse: RuqyahVerse) {

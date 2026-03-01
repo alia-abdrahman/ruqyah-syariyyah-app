@@ -4,6 +4,7 @@ struct VerseCard: View {
     let verse: RuqyahVerse
     let isFavorite: Bool
     let language: Language
+    var isPlaying: Bool = false
     var showActions: Bool = true
     var onFavoriteToggle: (() -> Void)?
     var onPlay: (() -> Void)?
@@ -11,6 +12,7 @@ struct VerseCard: View {
 
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var settingsViewModel: SettingsViewModel
+    @State private var animatePlay: Bool = false
 
     var body: some View {
         VStack(alignment: .trailing, spacing: AppConstants.spacingMedium) {
@@ -56,13 +58,38 @@ struct VerseCard: View {
                 HStack(spacing: AppConstants.spacingMedium) {
                     Spacer()
 
-                    if verse.audioPath != nil {
+                    // Show play button if verse has local audio or reference (for API audio)
+                    if verse.audioPath != nil || verse.reference != nil {
                         Button {
+                            withAnimation(.easeInOut(duration: 0.15)) {
+                                animatePlay = true
+                            }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    animatePlay = false
+                                }
+                            }
                             onPlay?()
                         } label: {
-                            Image(systemName: "play.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(.primaryGreen)
+                            ZStack {
+                                // Pulse animation ring when playing
+                                if isPlaying {
+                                    Circle()
+                                        .stroke(Color.primaryGreen.opacity(0.3), lineWidth: 2)
+                                        .frame(width: 32, height: 32)
+                                        .scaleEffect(animatePlay ? 1.3 : 1.0)
+                                        .opacity(animatePlay ? 0 : 0.5)
+                                        .animation(
+                                            .easeOut(duration: 1.0).repeatForever(autoreverses: false),
+                                            value: isPlaying
+                                        )
+                                }
+
+                                Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.primaryGreen)
+                                    .scaleEffect(animatePlay ? 0.85 : 1.0)
+                            }
                         }
                     }
 

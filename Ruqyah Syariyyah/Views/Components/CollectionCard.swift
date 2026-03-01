@@ -30,10 +30,10 @@ struct CollectionCard: View {
 
             // Name
             Text(collection.name)
-                .font(.headingSmall)
+                .font(.poppins(15, weight: .semibold))
                 .foregroundColor(.adaptiveText(colorScheme))
                 .lineLimit(2)
-                .minimumScaleFactor(0.8)
+                .fixedSize(horizontal: false, vertical: true)
 
             // Stats
             HStack(spacing: AppConstants.spacingSmall) {
@@ -45,7 +45,7 @@ struct CollectionCard: View {
         }
         .padding(AppConstants.spacingMedium)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: 180)
+        .frame(minHeight: 180)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusXLarge)
         .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)

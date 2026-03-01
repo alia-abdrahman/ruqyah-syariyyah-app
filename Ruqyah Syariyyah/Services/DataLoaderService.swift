@@ -145,8 +145,25 @@ actor DataLoaderService {
             return "amalan-pendinding-diri"
         } else if name.hasPrefix("pendinding_kediaman") || name.contains("pendinding_kediaman") {
             return "amalan-pendinding-kediaman"
-        } else if name.hasPrefix("surah_al_ikhlas") {
-            return "amalan-pendinding-diri"
+        }
+
+        // Amalan Pendinding Diri surahs
+        let pendindingDiriSurahs = [
+            "surah_al_ikhlas",
+            "surah_al_fatihah",
+            "surah_al_baqarah",
+            "surah_al_falaq",
+            "surah_an_nas",
+            "ayat_al_kursi",
+            "zikir_doa_pendinding",
+            "surah_al_anbiya",
+            "surah_al_mukminun"
+        ]
+
+        for surah in pendindingDiriSurahs {
+            if name.hasPrefix(surah) || name == surah {
+                return "amalan-pendinding-diri"
+            }
         }
 
         // Default: convert underscores to dashes and take first two parts

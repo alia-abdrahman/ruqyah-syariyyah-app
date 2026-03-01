@@ -7,61 +7,82 @@ struct CollectionDetailView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
+    @State private var showReadAllView: Bool = false
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Header
-                GeometryReader { geometry in
-                    ZStack(alignment: .topLeading) {
-                        LinearGradient(
-                            colors: [.primaryGreen, .primaryGreenDark],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+        VStack(spacing: 0) {
+            // Static Header
+            ZStack {
+                LinearGradient(
+                    colors: [.primaryGreen, .primaryGreenDark],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
 
-                        VStack(alignment: .leading, spacing: 8) {
-                            Spacer()
-                                .frame(height: geometry.safeAreaInsets.top + 100)
+                VStack(alignment: .leading, spacing: 8) {
+                    // Space for status bar and back button
+                    Spacer()
+                        .frame(height: 100)
 
-                            // Title
-                            Text(collection.name)
-                                .font(.poppins(28, weight: .bold))
-                                .foregroundColor(.white)
+                    // Title
+                    Text(collection.name)
+                        .font(.poppins(28, weight: .bold))
+                        .foregroundColor(.white)
 
-                            // Arabic Name
-                            if let arabicName = collection.nameArabic {
-                                Text(arabicName)
-                                    .font(.amiriQuran(20))
-                                    .foregroundColor(.white.opacity(0.9))
-                            }
-
-                            // Badge pills
-                            HStack(spacing: 12) {
-                                Text("\(collection.groupCount) groups")
-                                    .font(.poppins(13, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.2))
-                                    .cornerRadius(20)
-
-                                Text("\(collection.totalVerseCount) verses")
-                                    .font(.poppins(13, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 16)
-                                    .padding(.vertical, 8)
-                                    .background(Color.white.opacity(0.2))
-                                    .cornerRadius(20)
-                            }
-                            .padding(.top, 4)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 20)
+                    // Arabic Name
+                    if let arabicName = collection.nameArabic {
+                        Text(arabicName)
+                            .font(.amiriQuran(20))
+                            .foregroundColor(.white.opacity(0.9))
                     }
-                }
-                .frame(height: 300)
 
+                    // Badge pills
+                    HStack(spacing: 12) {
+                        Text("\(collection.groupCount) groups")
+                            .font(.poppins(13, weight: .medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(20)
+
+                        Text("\(collection.totalVerseCount) verses")
+                            .font(.poppins(13, weight: .medium))
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(20)
+                    }
+                    .padding(.top, 4)
+
+                    // Read All Button
+                    Button {
+                        showReadAllView = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "book.fill")
+                                .font(.system(size: 14, weight: .semibold))
+                            Text("Read All")
+                                .font(.poppins(14, weight: .semibold))
+                        }
+                        .foregroundColor(.primaryGreen)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.white)
+                        .cornerRadius(25)
+                    }
+                    .padding(.top, 12)
+
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+            }
+            .frame(height: 320)
+
+            // Scrollable Content
+            ScrollView {
                 VStack(spacing: AppConstants.spacingMedium) {
                     // Description Card
                     if let description = collection.description, !description.isEmpty {
@@ -96,13 +117,20 @@ struct CollectionDetailView: View {
                 Button {
                     dismiss()
                 } label: {
-                    Image(systemName: "chevron.left")
-                        .foregroundColor(.white)
-                        .fontWeight(.semibold)
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .fontWeight(.semibold)
+                        Text("Back")
+                            .font(.poppins(16, weight: .regular))
+                    }
+                    .foregroundColor(.white)
                 }
             }
         }
         .toolbarBackground(.hidden, for: .navigationBar)
+        .fullScreenCover(isPresented: $showReadAllView) {
+            CollectionMushafView(collection: collection)
+        }
     }
 }
 

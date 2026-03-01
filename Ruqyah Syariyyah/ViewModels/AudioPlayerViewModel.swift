@@ -11,12 +11,15 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var playbackSpeed: Float = 1.0
     @Published var showMiniPlayer: Bool = false
     @Published var isLoading: Bool = false
+    @Published var error: String?
 
     private let audioService = AudioService.shared
+    private let quranAudioService = QuranAudioService.shared
     private var cancellables = Set<AnyCancellable>()
 
     init() {
         setupBindings()
+        setupPlaybackEndedObserver()
     }
 
     private func setupBindings() {
@@ -35,20 +38,73 @@ class AudioPlayerViewModel: ObservableObject {
         audioService.$playbackSpeed
             .receive(on: DispatchQueue.main)
             .assign(to: &$playbackSpeed)
+
+        audioService.$isLoading
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$isLoading)
+
+        audioService.$error
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$error)
+    }
+
+    private func setupPlaybackEndedObserver() {
+        NotificationCenter.default.addObserver(
+            forName: .audioPlaybackEnded,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handlePlaybackEnded()
+            }
+        }
+    }
+
+    private func handlePlaybackEnded() {
+        // Auto-play next verse only if autoPlayNext is enabled (e.g., Play All mode)
+        if autoPlayNext && hasNext {
+            playNext()
+        } else {
+            // Stop and hide mini player when single verse finishes
+            showMiniPlayer = false
+            currentVerse = nil
+        }
     }
 
     // MARK: - Playback Controls
     func playVerse(_ verse: RuqyahVerse) {
-        guard let audioPath = verse.audioPath else { return }
-
         isLoading = true
         currentVerse = verse
         showMiniPlayer = true
+        error = nil
 
-        // Convert Flutter asset path to actual file name
-        let fileName = URL(string: audioPath)?.lastPathComponent ?? audioPath
-        audioService.play(named: fileName, trackId: verse.uniqueKey)
-        isLoading = false
+        Task {
+            do {
+                // Try to fetch audio from Quran.com API using the reference
+                if let reference = verse.reference {
+                    let audioURL = try await quranAudioService.fetchAudioURL(reference: reference)
+                    audioService.playRemote(url: audioURL, trackId: verse.uniqueKey)
+                } else {
+                    // Fallback to local audio if available
+                    if let audioPath = verse.audioPath {
+                        let fileName = URL(string: audioPath)?.lastPathComponent ?? audioPath
+                        audioService.play(named: fileName, trackId: verse.uniqueKey)
+                    } else {
+                        error = "No audio available for this verse"
+                        isLoading = false
+                    }
+                }
+            } catch {
+                // Fallback to local audio on API error
+                if let audioPath = verse.audioPath {
+                    let fileName = URL(string: audioPath)?.lastPathComponent ?? audioPath
+                    audioService.play(named: fileName, trackId: verse.uniqueKey)
+                } else {
+                    self.error = error.localizedDescription
+                    isLoading = false
+                }
+            }
+        }
     }
 
     func togglePlayPause() {
@@ -88,22 +144,36 @@ class AudioPlayerViewModel: ObservableObject {
     // MARK: - Playlist Support
     var verses: [RuqyahVerse] = []
     var currentIndex: Int = 0
+    var autoPlayNext: Bool = false
 
-    func setPlaylist(_ verses: [RuqyahVerse], startIndex: Int = 0) {
+    func setPlaylist(_ verses: [RuqyahVerse], startIndex: Int = 0, autoPlay: Bool = false) {
         self.verses = verses
         self.currentIndex = startIndex
+        self.autoPlayNext = autoPlay
+    }
+
+    /// Play a single verse without auto-advancing to next
+    func playSingleVerse(_ verse: RuqyahVerse) {
+        autoPlayNext = false
+        verses = []
+        currentIndex = 0
+        playVerse(verse)
     }
 
     func playNext() {
         guard !verses.isEmpty else { return }
-        currentIndex = (currentIndex + 1) % verses.count
-        playVerse(verses[currentIndex])
+        if currentIndex < verses.count - 1 {
+            currentIndex += 1
+            playVerse(verses[currentIndex])
+        }
     }
 
     func playPrevious() {
         guard !verses.isEmpty else { return }
-        currentIndex = currentIndex > 0 ? currentIndex - 1 : verses.count - 1
-        playVerse(verses[currentIndex])
+        if currentIndex > 0 {
+            currentIndex -= 1
+            playVerse(verses[currentIndex])
+        }
     }
 
     var hasNext: Bool {

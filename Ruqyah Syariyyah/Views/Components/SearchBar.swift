@@ -7,6 +7,8 @@ struct SearchBar: View {
 
     @FocusState private var isFocused: Bool
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         HStack(spacing: AppConstants.spacingSmall) {
             Image(systemName: "magnifyingglass")
@@ -29,12 +31,12 @@ struct SearchBar: View {
             }
         }
         .padding(.horizontal, AppConstants.spacingMedium)
-        .padding(.vertical, 12)
-        .background(Color.backgroundLight)
+        .padding(.vertical, 14)
+        .background(colorScheme == .dark ? Color.gray.opacity(0.15) : Color.gray.opacity(0.08))
         .cornerRadius(AppConstants.radiusLarge)
         .overlay(
             RoundedRectangle(cornerRadius: AppConstants.radiusLarge)
-                .stroke(isFocused ? Color.primaryGreen : Color.clear, lineWidth: 2)
+                .stroke(isFocused ? Color.primaryGreen : Color.gray.opacity(0.2), lineWidth: 1)
         )
     }
 }

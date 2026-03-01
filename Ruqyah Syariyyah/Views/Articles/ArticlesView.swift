@@ -6,51 +6,16 @@ struct ArticlesView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header
-                    GeometryReader { geometry in
-                        ZStack {
-                            LinearGradient(
-                                colors: [.primaryGreen, .primaryGreenDark],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+            VStack(spacing: 0) {
+                // Static Header
+                GradientHeader(
+                    title: "Articles",
+                    subtitle: "Learn and expand your knowledge"
+                )
+                .frame(height: 160)
 
-                            HStack {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Spacer()
-                                        .frame(height: geometry.safeAreaInsets.top + 16)
-
-                                    Text("Articles")
-                                        .font(.poppins(28, weight: .bold))
-                                        .foregroundColor(.white)
-
-                                    Text("Learn and expand your knowledge")
-                                        .font(.poppins(14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.85))
-                                }
-
-                                Spacer()
-
-                                // Globe icon
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 16)
-                                        .fill(Color.white.opacity(0.25))
-                                        .frame(width: 56, height: 56)
-
-                                    Image(systemName: "globe")
-                                        .font(.system(size: 24, weight: .regular))
-                                        .foregroundColor(.white)
-                                }
-                                .padding(.top, geometry.safeAreaInsets.top)
-                            }
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 16)
-                        }
-                    }
-                    .frame(height: 160)
-
+                // Scrollable Content
+                ScrollView {
                     VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
                         // Category Filter
                         ScrollView(.horizontal, showsIndicators: false) {
@@ -110,6 +75,7 @@ struct ArticlesView: View {
                             .padding(.horizontal, AppConstants.spacingMedium)
                         }
                     }
+                    .padding(.top, AppConstants.spacingMedium)
                     .padding(.bottom, AppConstants.spacingXLarge)
                 }
             }

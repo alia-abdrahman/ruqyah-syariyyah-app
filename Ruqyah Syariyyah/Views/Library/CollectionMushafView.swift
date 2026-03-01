@@ -1,0 +1,296 @@
+import SwiftUI
+
+/// A continuous reading view that displays all surahs from a collection in mushaf-style format
+/// Each surah shows combined Arabic text (like in Quran) followed by translations
+/// Supports auto-scroll and verse highlighting during audio playback
+struct CollectionMushafView: View {
+    let collection: Collection
+
+    @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
+    @EnvironmentObject var audioPlayerViewModel: AudioPlayerViewModel
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.dismiss) private var dismiss
+
+    // Get all groups for this collection
+    private var groups: [VerseGroup] {
+        contentViewModel.getGroupsForCollection(collection.id)
+    }
+
+    // Get all verses for the collection (for audio playback)
+    private var allVerses: [RuqyahVerse] {
+        contentViewModel.getVersesForCollection(collection.id)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack(alignment: .bottom) {
+                VStack(spacing: 0) {
+                    // Green Header Bar with Icons
+                    HStack {
+                        // Close button
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.white)
+                        }
+
+                        Spacer()
+
+                        // Title
+                        Text(collection.name)
+                            .font(.poppins(16, weight: .semibold))
+                            .foregroundColor(.white)
+
+                        Spacer()
+
+                        // Play All button
+                        Button {
+                            playAllVerses()
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 36, height: 36)
+
+                                Image(systemName: audioPlayerViewModel.isPlaying ? "pause.fill" : "play.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primaryGreen)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, AppConstants.spacingMedium)
+                    .padding(.vertical, 12)
+                    .background(Color.primaryGreen)
+
+                    // Scrollable Content - All Surahs in Mushaf Style with ScrollViewReader
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            LazyVStack(spacing: AppConstants.spacingLarge) {
+                                ForEach(groups) { group in
+                                    let verses = contentViewModel.getVersesForGroup(group.collectionId, groupName: group.name)
+
+                                    MushafSurahSection(
+                                        groupName: group.name,
+                                        verses: verses,
+                                        colorScheme: colorScheme,
+                                        language: contentViewModel.language,
+                                        currentPlayingVerse: audioPlayerViewModel.currentVerse,
+                                        isPlaying: audioPlayerViewModel.isPlaying
+                                    )
+                                    .id(group.id) // For scrolling to surah
+                                }
+                            }
+                            .padding(.top, AppConstants.spacingMedium)
+                            .padding(.bottom, audioPlayerViewModel.showMiniPlayer ? 100 : AppConstants.spacingXLarge)
+                        }
+                        .onChange(of: audioPlayerViewModel.currentVerse?.id) { _, newVerseId in
+                            // Auto-scroll to the current playing verse's group/surah
+                            if let currentVerse = audioPlayerViewModel.currentVerse {
+                                let groupId = "\(currentVerse.collection ?? "")_\(currentVerse.group)"
+                                withAnimation(.easeInOut(duration: 0.5)) {
+                                    proxy.scrollTo(groupId, anchor: .top)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Mini Player overlay at bottom
+                if audioPlayerViewModel.showMiniPlayer {
+                    MiniPlayerView()
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .background(Color.adaptiveBackground(colorScheme))
+            .navigationBarHidden(true)
+            .animation(.easeInOut(duration: 0.25), value: audioPlayerViewModel.showMiniPlayer)
+        }
+    }
+
+    // MARK: - Play All Verses
+    private func playAllVerses() {
+        guard !allVerses.isEmpty else { return }
+
+        if audioPlayerViewModel.isPlaying {
+            audioPlayerViewModel.pause()
+        } else {
+            audioPlayerViewModel.setPlaylist(allVerses, startIndex: 0, autoPlay: true)
+            audioPlayerViewModel.playVerse(allVerses[0])
+        }
+    }
+}
+
+// MARK: - Mushaf Surah Section (Each Surah in Mushaf Style)
+private struct MushafSurahSection: View {
+    let groupName: String
+    let verses: [RuqyahVerse]
+    let colorScheme: ColorScheme
+    let language: Language
+    let currentPlayingVerse: RuqyahVerse?
+    let isPlaying: Bool
+
+    var body: some View {
+        VStack(spacing: AppConstants.spacingMedium) {
+            // Surah Title Header
+            Text(groupName)
+                .font(.poppins(20, weight: .bold))
+                .foregroundColor(.primaryGreen)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(Color.primaryGreen.opacity(0.1))
+                .cornerRadius(AppConstants.radiusLarge)
+                .padding(.horizontal, AppConstants.spacingMedium)
+
+            // Arabic Text Card - Combined Mushaf Style with verse highlighting
+            VStack(spacing: 0) {
+                combinedArabicTextWithHighlighting
+                    .padding(AppConstants.spacingLarge)
+            }
+            .background(Color.adaptiveSurface(colorScheme))
+            .cornerRadius(AppConstants.radiusLarge)
+            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .padding(.horizontal, AppConstants.spacingMedium)
+
+            // Translation Section
+            VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
+                Text("Translation")
+                    .font(.poppins(18, weight: .bold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+                    .padding(.bottom, 4)
+
+                ForEach(Array(verses.enumerated()), id: \.element.id) { index, verse in
+                    let isCurrentVerse = currentPlayingVerse?.id == verse.id && isPlaying
+
+                    translationRow(verse: verse, index: index + 1, isHighlighted: isCurrentVerse)
+                }
+            }
+            .padding(AppConstants.spacingLarge)
+            .background(Color.adaptiveSurface(colorScheme))
+            .cornerRadius(AppConstants.radiusLarge)
+            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+            .padding(.horizontal, AppConstants.spacingMedium)
+        }
+    }
+
+    // MARK: - Combined Arabic Text with Verse Highlighting (Mushaf Style)
+    private var combinedArabicTextWithHighlighting: some View {
+        // Build attributed string with highlighting for current verse
+        let attributedText = buildAttributedText()
+
+        return Text(attributedText)
+            .font(.amiriQuran(28))
+            .multilineTextAlignment(.trailing)
+            .lineSpacing(20)
+            .environment(\.layoutDirection, .rightToLeft)
+    }
+
+    private func buildAttributedText() -> AttributedString {
+        var fullText = AttributedString()
+
+        for (index, verse) in verses.enumerated() {
+            let verseNumber = verse.verseNumber ?? toArabicNumeral(index + 1)
+            let isCurrentVerse = currentPlayingVerse?.id == verse.id && isPlaying
+
+            // Verse text - change color to green when playing (contrasts with white bg)
+            var verseText = AttributedString(verse.arabicText)
+            if isCurrentVerse {
+                verseText.foregroundColor = Color.primaryGreen
+            } else {
+                verseText.foregroundColor = Color.adaptiveTextColor(colorScheme)
+            }
+
+            // Verse number
+            var verseNumberText = AttributedString(" ﴿\(verseNumber)﴾")
+            verseNumberText.foregroundColor = isCurrentVerse ? Color.primaryGreen : Color.primaryGreen.opacity(0.5)
+
+            // Spacing
+            var spacing = AttributedString(" ")
+            spacing.foregroundColor = Color.adaptiveTextColor(colorScheme)
+
+            fullText.append(verseText)
+            fullText.append(verseNumberText)
+            if index < verses.count - 1 {
+                fullText.append(spacing)
+            }
+        }
+
+        return fullText
+    }
+
+    // MARK: - Translation Row
+    private func translationRow(verse: RuqyahVerse, index: Int, isHighlighted: Bool) -> some View {
+        HStack(alignment: .top, spacing: AppConstants.spacingMedium) {
+            // Arabic numeral in circle
+            ZStack {
+                Circle()
+                    .stroke(Color.primaryGreen, lineWidth: 1.5)
+                    .frame(width: 28, height: 28)
+
+                Text(toArabicNumeral(index))
+                    .font(.poppins(12, weight: .medium))
+                    .foregroundColor(.primaryGreen)
+            }
+
+            // Translation text - green color when playing
+            VStack(alignment: .leading, spacing: 4) {
+                Text(verse.translation(for: language))
+                    .font(.poppins(14, weight: .regular))
+                    .foregroundColor(isHighlighted ? .primaryGreen : .adaptiveSecondaryText(colorScheme))
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // Reference
+                if let reference = verse.reference {
+                    Text("(\(reference))")
+                        .font(.poppins(12, weight: .medium))
+                        .foregroundColor(.primaryGreen.opacity(0.8))
+                }
+            }
+        }
+    }
+
+    // MARK: - Helper: Convert to Arabic Numerals
+    private func toArabicNumeral(_ number: Int) -> String {
+        let arabicNumerals = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"]
+        var result = ""
+        var num = number
+
+        if num == 0 {
+            return arabicNumerals[0]
+        }
+
+        while num > 0 {
+            let digit = num % 10
+            result = arabicNumerals[digit] + result
+            num /= 10
+        }
+
+        return result
+    }
+}
+
+// MARK: - Color Extension for AttributedString
+extension Color {
+    static func adaptiveTextColor(_ colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? .white : .black
+    }
+}
+
+#Preview {
+    CollectionMushafView(collection: Collection(
+        id: "amalan-pendinding-diri",
+        name: "Amalan Pendinding Diri",
+        nameArabic: "أعمال حماية النفس",
+        description: "Protection prayers and verses from the Holy Quran for spiritual shielding",
+        icon: "shield",
+        sortOrder: 1,
+        groupCount: 10,
+        totalVerseCount: 38
+    ))
+    .environmentObject(ContentViewModel())
+    .environmentObject(SettingsViewModel())
+    .environmentObject(AudioPlayerViewModel())
+}

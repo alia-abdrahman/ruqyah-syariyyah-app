@@ -5,7 +5,6 @@ struct LibraryView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var searchText: String = ""
-    @State private var showFavorites: Bool = false
 
     private let columns = [
         GridItem(.flexible(), spacing: AppConstants.spacingMedium),
@@ -14,53 +13,52 @@ struct LibraryView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header
-                    GradientHeader(
-                        title: "Library",
-                        subtitle: "Your spiritual healing collection"
-                    ) {
-                        SearchBar(text: $searchText, placeholder: "Search verses...")
-                            .padding(.top, 8)
+            VStack(spacing: 0) {
+                // Static Header with Favourites Button
+                GradientHeader(
+                    title: "Library",
+                    subtitle: "Your spiritual healing collection",
+                    trailingContent: {
+                        NavigationLink(destination: FavouritesView()) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "heart.fill")
+                                    .font(.system(size: 14, weight: .medium))
+                                Text("Favourites")
+                                    .font(.poppins(13, weight: .medium))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 8)
+                            .background(Color.white.opacity(0.2))
+                            .cornerRadius(20)
+                        }
                     }
-                    .frame(height: 220)
+                )
+                .frame(height: 160)
 
+                // Scrollable Content
+                ScrollView {
                     VStack(spacing: AppConstants.spacingMedium) {
+                        // Search Bar
+                        SearchBar(text: $searchText, placeholder: "Search verses...")
+                            .padding(.horizontal, AppConstants.spacingMedium)
+
                         // Welcome Banner
                         welcomeBanner
                             .padding(.horizontal, AppConstants.spacingMedium)
 
-                        // Favorites Toggle
-                        HStack {
+                        // Collections Header
+                        if searchText.isEmpty {
                             Text("Collections")
                                 .font(.headingSmall)
                                 .foregroundColor(.adaptiveText(colorScheme))
-
-                            Spacer()
-
-                            Button {
-                                showFavorites.toggle()
-                            } label: {
-                                HStack(spacing: 4) {
-                                    Image(systemName: showFavorites ? "heart.fill" : "heart")
-                                    Text("Favorites")
-                                }
-                                .font(.bodySmall)
-                                .foregroundColor(showFavorites ? .red : .textSecondary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(showFavorites ? Color.red.opacity(0.1) : Color.clear)
-                                .cornerRadius(AppConstants.radiusSmall)
-                            }
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.horizontal, AppConstants.spacingMedium)
                         }
-                        .padding(.horizontal, AppConstants.spacingMedium)
 
                         if contentViewModel.isLoading {
                             ProgressView()
                                 .frame(height: 200)
-                        } else if showFavorites {
-                            favoritesSection
                         } else if !searchText.isEmpty {
                             searchResultsSection
                         } else {
@@ -123,10 +121,10 @@ struct LibraryView: View {
 
     // MARK: - Search Results
     private var searchResultsSection: some View {
-        let results = contentViewModel.searchVerses(searchText)
+        let results = contentViewModel.searchAll(searchText)
 
         return VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
-            Text("\(results.count) results")
+            Text("\(results.totalCount) results")
                 .font(.bodySmall)
                 .foregroundColor(.textSecondary)
                 .padding(.horizontal, AppConstants.spacingMedium)
@@ -140,14 +138,54 @@ struct LibraryView: View {
                 .frame(height: 200)
             } else {
                 LazyVStack(spacing: AppConstants.spacingMedium) {
-                    ForEach(results) { verse in
-                        NavigationLink(destination: VerseDetailView(verse: verse)) {
-                            CompactVerseCard(
-                                verse: verse,
-                                isFavorite: contentViewModel.isFavorite(verse)
-                            )
+                    // Collections Results
+                    if !results.collections.isEmpty {
+                        Text("Collections")
+                            .font(.poppins(14, weight: .semibold))
+                            .foregroundColor(.textSecondary)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+
+                        ForEach(results.collections) { collection in
+                            NavigationLink(destination: CollectionDetailView(collection: collection)) {
+                                SearchCollectionRow(collection: collection)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
+                    }
+
+                    // Groups/Surahs Results
+                    if !results.groups.isEmpty {
+                        Text("Surahs")
+                            .font(.poppins(14, weight: .semibold))
+                            .foregroundColor(.textSecondary)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.top, results.collections.isEmpty ? 0 : AppConstants.spacingSmall)
+
+                        ForEach(results.groups, id: \.group.id) { item in
+                            NavigationLink(destination: GroupDetailView(group: item.group)) {
+                                SearchGroupRow(group: item.group, collectionName: item.collection.name)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    // Verses Results
+                    if !results.verses.isEmpty {
+                        Text("Verses")
+                            .font(.poppins(14, weight: .semibold))
+                            .foregroundColor(.textSecondary)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.top, (results.collections.isEmpty && results.groups.isEmpty) ? 0 : AppConstants.spacingSmall)
+
+                        ForEach(results.verses) { verse in
+                            NavigationLink(destination: VerseDetailView(verse: verse)) {
+                                CompactVerseCard(
+                                    verse: verse,
+                                    isFavorite: contentViewModel.isFavorite(verse)
+                                )
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
                 .padding(.horizontal, AppConstants.spacingMedium)
@@ -156,39 +194,100 @@ struct LibraryView: View {
         .padding(.bottom, AppConstants.spacingXLarge)
     }
 
-    // MARK: - Favorites Section
-    private var favoritesSection: some View {
-        let favorites = contentViewModel.favoriteVerses
+}
 
-        return VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
-            if favorites.isEmpty {
-                ContentUnavailableView(
-                    "No Favorites",
-                    systemImage: "heart",
-                    description: Text("Tap the heart icon on any verse to add it to favorites")
-                )
-                .frame(height: 200)
-            } else {
-                Text("\(favorites.count) favorites")
-                    .font(.bodySmall)
-                    .foregroundColor(.textSecondary)
-                    .padding(.horizontal, AppConstants.spacingMedium)
+// MARK: - Search Collection Row
+struct SearchCollectionRow: View {
+    let collection: Collection
+    @Environment(\.colorScheme) private var colorScheme
 
-                LazyVStack(spacing: AppConstants.spacingMedium) {
-                    ForEach(favorites) { verse in
-                        NavigationLink(destination: VerseDetailView(verse: verse)) {
-                            CompactVerseCard(
-                                verse: verse,
-                                isFavorite: true
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.horizontal, AppConstants.spacingMedium)
+    var body: some View {
+        HStack(spacing: AppConstants.spacingMedium) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.primaryGreen.opacity(0.15))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: collection.sfSymbol)
+                    .font(.system(size: 18))
+                    .foregroundColor(.primaryGreen)
             }
+
+            // Info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(collection.name)
+                    .font(.poppins(15, weight: .semibold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+
+                HStack(spacing: AppConstants.spacingSmall) {
+                    Label("\(collection.groupCount) groups", systemImage: "folder")
+                    Label("\(collection.totalVerseCount) verses", systemImage: "text.quote")
+                }
+                .font(.poppins(12, weight: .regular))
+                .foregroundColor(.textSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.gray.opacity(0.5))
         }
-        .padding(.bottom, AppConstants.spacingXLarge)
+        .padding(AppConstants.spacingMedium)
+        .background(Color.adaptiveSurface(colorScheme))
+        .cornerRadius(AppConstants.radiusMedium)
+    }
+}
+
+// MARK: - Search Group Row
+struct SearchGroupRow: View {
+    let group: VerseGroup
+    let collectionName: String
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        HStack(spacing: AppConstants.spacingMedium) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.primaryGreen)
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: "book.fill")
+                    .font(.system(size: 18))
+                    .foregroundColor(.white)
+            }
+
+            // Info
+            VStack(alignment: .leading, spacing: 2) {
+                Text(group.name)
+                    .font(.poppins(15, weight: .semibold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+
+                Text("\(collectionName) • \(group.verseCount) verses")
+                    .font(.poppins(12, weight: .regular))
+                    .foregroundColor(.textSecondary)
+            }
+
+            Spacer()
+
+            // Arabic preview
+            if let preview = group.arabicPreview {
+                Text(preview)
+                    .font(.amiriQuran(14))
+                    .foregroundColor(.textSecondary)
+                    .lineLimit(1)
+                    .frame(maxWidth: 80, alignment: .trailing)
+            }
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.gray.opacity(0.5))
+        }
+        .padding(AppConstants.spacingMedium)
+        .background(Color.adaptiveSurface(colorScheme))
+        .cornerRadius(AppConstants.radiusMedium)
     }
 }
 
@@ -196,4 +295,5 @@ struct LibraryView: View {
     LibraryView()
         .environmentObject(ContentViewModel())
         .environmentObject(SettingsViewModel())
+        .environmentObject(AudioPlayerViewModel())
 }

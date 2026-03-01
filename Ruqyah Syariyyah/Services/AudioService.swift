@@ -6,17 +6,23 @@ import Combine
 class AudioService: ObservableObject {
     static let shared = AudioService()
 
-    private var player: AVAudioPlayer?
-    private var timer: Timer?
+    private var player: AVPlayer?
+    private var playerItem: AVPlayerItem?
+    private var timeObserver: Any?
+    private var statusObserver: NSKeyValueObservation?
+    private var durationObserver: NSKeyValueObservation?
 
     @Published var isPlaying: Bool = false
     @Published var currentTime: Double = 0
     @Published var duration: Double = 0
     @Published var currentTrackId: String?
     @Published var playbackSpeed: Float = 1.0
+    @Published var isLoading: Bool = false
+    @Published var error: String?
 
     private init() {
         setupAudioSession()
+        setupNotifications()
     }
 
     private func setupAudioSession() {
@@ -28,25 +34,79 @@ class AudioService: ObservableObject {
         }
     }
 
-    // MARK: - Playback Controls
-    func play(url: URL, trackId: String) {
-        stop()
-
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.enableRate = true
-            player?.rate = playbackSpeed
-            player?.prepareToPlay()
-            player?.play()
-
-            currentTrackId = trackId
-            duration = player?.duration ?? 0
-            isPlaying = true
-
-            startTimer()
-        } catch {
-            print("Failed to play audio: \(error)")
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: .AVPlayerItemDidPlayToEndTime,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.handlePlaybackEnded()
+            }
         }
+    }
+
+    // MARK: - Play from Remote URL (Streaming)
+    func playRemote(url: URL, trackId: String) {
+        stop()
+        isLoading = true
+        error = nil
+
+        playerItem = AVPlayerItem(url: url)
+        player = AVPlayer(playerItem: playerItem)
+        player?.rate = playbackSpeed
+
+        currentTrackId = trackId
+
+        // Observe player item status
+        statusObserver = playerItem?.observe(\.status, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor in
+                self?.handleStatusChange(item.status)
+            }
+        }
+
+        // Observe duration
+        durationObserver = playerItem?.observe(\.duration, options: [.new]) { [weak self] item, _ in
+            Task { @MainActor in
+                let seconds = CMTimeGetSeconds(item.duration)
+                if !seconds.isNaN && seconds.isFinite {
+                    self?.duration = seconds
+                }
+            }
+        }
+
+        setupTimeObserver()
+    }
+
+    private func handleStatusChange(_ status: AVPlayerItem.Status) {
+        switch status {
+        case .readyToPlay:
+            isLoading = false
+            player?.play()
+            isPlaying = true
+        case .failed:
+            isLoading = false
+            isPlaying = false
+            error = playerItem?.error?.localizedDescription ?? "Failed to load audio"
+        case .unknown:
+            break
+        @unknown default:
+            break
+        }
+    }
+
+    private func handlePlaybackEnded() {
+        isPlaying = false
+        currentTime = 0
+        player?.seek(to: .zero)
+
+        // Post notification for playlist handling
+        NotificationCenter.default.post(name: .audioPlaybackEnded, object: nil)
+    }
+
+    // MARK: - Play from Local File
+    func play(url: URL, trackId: String) {
+        playRemote(url: url, trackId: trackId)
     }
 
     func play(named fileName: String, trackId: String) {
@@ -54,29 +114,33 @@ class AudioService: ObservableObject {
             print("Audio file not found: \(fileName)")
             return
         }
-        play(url: url, trackId: trackId)
+        playRemote(url: url, trackId: trackId)
     }
 
+    // MARK: - Playback Controls
     func pause() {
         player?.pause()
         isPlaying = false
-        stopTimer()
     }
 
     func resume() {
         player?.play()
         isPlaying = true
-        startTimer()
     }
 
     func stop() {
-        player?.stop()
+        player?.pause()
         player = nil
+        playerItem = nil
         isPlaying = false
         currentTime = 0
         duration = 0
         currentTrackId = nil
-        stopTimer()
+        isLoading = false
+        error = nil
+        removeTimeObserver()
+        statusObserver?.invalidate()
+        durationObserver?.invalidate()
     }
 
     func togglePlayPause() {
@@ -89,7 +153,8 @@ class AudioService: ObservableObject {
 
     // MARK: - Seek
     func seek(to time: Double) {
-        player?.currentTime = time
+        let cmTime = CMTime(seconds: time, preferredTimescale: 600)
+        player?.seek(to: cmTime)
         currentTime = time
     }
 
@@ -106,32 +171,28 @@ class AudioService: ObservableObject {
     // MARK: - Playback Speed
     func setPlaybackSpeed(_ speed: Float) {
         playbackSpeed = speed
-        player?.rate = speed
+        player?.rate = isPlaying ? speed : 0
     }
 
-    // MARK: - Timer
-    private func startTimer() {
-        stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+    // MARK: - Time Observer
+    private func setupTimeObserver() {
+        removeTimeObserver()
+
+        let interval = CMTime(seconds: 0.1, preferredTimescale: 600)
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
             Task { @MainActor in
-                self?.updateCurrentTime()
+                let seconds = CMTimeGetSeconds(time)
+                if !seconds.isNaN && seconds.isFinite {
+                    self?.currentTime = seconds
+                }
             }
         }
     }
 
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-
-    private func updateCurrentTime() {
-        guard let player = player else { return }
-        currentTime = player.currentTime
-
-        if !player.isPlaying && currentTime >= duration - 0.1 {
-            // Playback finished
-            isPlaying = false
-            stopTimer()
+    private func removeTimeObserver() {
+        if let observer = timeObserver {
+            player?.removeTimeObserver(observer)
+            timeObserver = nil
         }
     }
 
@@ -149,9 +210,15 @@ class AudioService: ObservableObject {
     }
 
     private func formatTime(_ time: Double) -> String {
+        guard !time.isNaN && time.isFinite else { return "0:00" }
         let totalSeconds = Int(time)
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60
         return String(format: "%d:%02d", minutes, seconds)
     }
+}
+
+// MARK: - Notification Names
+extension Notification.Name {
+    static let audioPlaybackEnded = Notification.Name("audioPlaybackEnded")
 }

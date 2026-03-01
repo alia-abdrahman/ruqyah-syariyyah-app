@@ -127,6 +127,61 @@ class ContentViewModel: ObservableObject {
         }
     }
 
+    // MARK: - Search Collections
+    func searchCollections(_ query: String) -> [Collection] {
+        guard !query.isEmpty else { return [] }
+
+        let lowercasedQuery = query.lowercased()
+        return collections.filter { collection in
+            collection.name.lowercased().contains(lowercasedQuery) ||
+            (collection.nameArabic?.lowercased().contains(lowercasedQuery) ?? false) ||
+            (collection.description?.lowercased().contains(lowercasedQuery) ?? false)
+        }
+    }
+
+    // MARK: - Search Groups (Surahs)
+    func searchGroups(_ query: String) -> [(group: VerseGroup, collection: Collection)] {
+        guard !query.isEmpty else { return [] }
+
+        let lowercasedQuery = query.lowercased()
+        var results: [(group: VerseGroup, collection: Collection)] = []
+
+        for collection in collections {
+            let groups = getGroupsForCollection(collection.id)
+            for group in groups {
+                if group.name.lowercased().contains(lowercasedQuery) ||
+                   (group.arabicPreview?.lowercased().contains(lowercasedQuery) ?? false) {
+                    results.append((group: group, collection: collection))
+                }
+            }
+        }
+
+        return results
+    }
+
+    // MARK: - Combined Search Results
+    struct SearchResults {
+        var collections: [Collection]
+        var groups: [(group: VerseGroup, collection: Collection)]
+        var verses: [RuqyahVerse]
+
+        var totalCount: Int {
+            collections.count + groups.count + verses.count
+        }
+
+        var isEmpty: Bool {
+            collections.isEmpty && groups.isEmpty && verses.isEmpty
+        }
+    }
+
+    func searchAll(_ query: String) -> SearchResults {
+        return SearchResults(
+            collections: searchCollections(query),
+            groups: searchGroups(query),
+            verses: searchVerses(query)
+        )
+    }
+
     // MARK: - Favorites
     func isFavorite(_ verse: RuqyahVerse) -> Bool {
         favoriteVerseKeys.contains(verse.uniqueKey)

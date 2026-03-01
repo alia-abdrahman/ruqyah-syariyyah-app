@@ -55,7 +55,21 @@ struct ArticleDetailView: View {
         }
         .background(Color.adaptiveBackground(colorScheme))
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
         .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .fontWeight(.semibold)
+                        Text("Back")
+                            .font(.poppins(16, weight: .regular))
+                    }
+                    .foregroundColor(.primaryGreen)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     shareArticle()

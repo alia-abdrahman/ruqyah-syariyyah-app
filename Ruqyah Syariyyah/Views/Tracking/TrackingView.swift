@@ -15,89 +15,16 @@ struct TrackingView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    // Header with Timer
-                    GeometryReader { geometry in
-                        ZStack {
-                            LinearGradient(
-                                colors: [.primaryGreen, .primaryGreenDark],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+            VStack(spacing: 0) {
+                // Static Header
+                GradientHeader(
+                    title: "Track Your Practice",
+                    subtitle: "Build consistency with daily sessions"
+                )
+                .frame(height: 160)
 
-                            VStack(spacing: 12) {
-                                Spacer()
-                                    .frame(height: geometry.safeAreaInsets.top + 16)
-
-                                if trackingViewModel.isSessionActive {
-                                    // Active Session
-                                    Text("Session in Progress")
-                                        .font(.poppins(14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.85))
-
-                                    Text(trackingViewModel.elapsedTimeFormatted)
-                                        .font(.system(size: 48, weight: .bold, design: .monospaced))
-                                        .foregroundColor(.white)
-
-                                    HStack(spacing: 16) {
-                                        Button {
-                                            trackingViewModel.cancelSession()
-                                        } label: {
-                                            Label("Cancel", systemImage: "xmark")
-                                                .font(.poppins(14, weight: .medium))
-                                                .foregroundColor(.white)
-                                                .padding(.horizontal, 20)
-                                                .padding(.vertical, 10)
-                                                .background(Color.white.opacity(0.2))
-                                                .cornerRadius(10)
-                                        }
-
-                                        Button {
-                                            Task {
-                                                await trackingViewModel.endSession()
-                                            }
-                                        } label: {
-                                            Label("End", systemImage: "checkmark")
-                                                .font(.poppins(14, weight: .medium))
-                                                .foregroundColor(.primaryGreen)
-                                                .padding(.horizontal, 20)
-                                                .padding(.vertical, 10)
-                                                .background(Color.white)
-                                                .cornerRadius(10)
-                                        }
-                                    }
-                                } else {
-                                    // Start Session
-                                    Text("Track Your Practice")
-                                        .font(.poppins(28, weight: .bold))
-                                        .foregroundColor(.white)
-
-                                    Text("Build consistency with daily sessions")
-                                        .font(.poppins(14, weight: .regular))
-                                        .foregroundColor(.white.opacity(0.85))
-
-                                    Button {
-                                        showStartSession = true
-                                    } label: {
-                                        Label("Start Session", systemImage: "play.fill")
-                                            .font(.poppins(14, weight: .semibold))
-                                            .foregroundColor(.primaryGreen)
-                                            .padding(.horizontal, 24)
-                                            .padding(.vertical, 12)
-                                            .background(Color.white)
-                                            .cornerRadius(12)
-                                    }
-                                    .padding(.top, 4)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 16)
-                        }
-                    }
-                    .frame(height: 220)
-
+                // Scrollable Content
+                ScrollView {
                     // Stats Section
                     VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
                         Text("Statistics")
@@ -135,6 +62,101 @@ struct TrackingView: View {
                         }
                         .padding(.horizontal, AppConstants.spacingMedium)
 
+                        // Session Controls Section
+                        if trackingViewModel.isSessionActive {
+                            // Active Session Card
+                            VStack(spacing: 16) {
+                                Text("Session in Progress")
+                                    .font(.poppins(14, weight: .medium))
+                                    .foregroundColor(.textSecondary)
+
+                                Text(trackingViewModel.elapsedTimeFormatted)
+                                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+                                    .foregroundColor(.primaryGreen)
+
+                                HStack(spacing: 16) {
+                                    Button {
+                                        trackingViewModel.cancelSession()
+                                    } label: {
+                                        Label("Cancel", systemImage: "xmark")
+                                            .font(.poppins(14, weight: .medium))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 12)
+                                            .background(Color.gray.opacity(0.6))
+                                            .cornerRadius(10)
+                                    }
+
+                                    Button {
+                                        Task {
+                                            await trackingViewModel.endSession()
+                                        }
+                                    } label: {
+                                        Label("End", systemImage: "checkmark")
+                                            .font(.poppins(14, weight: .medium))
+                                            .foregroundColor(.white)
+                                            .frame(maxWidth: .infinity)
+                                            .padding(.vertical, 12)
+                                            .background(Color.primaryGreen)
+                                            .cornerRadius(10)
+                                    }
+                                }
+                            }
+                            .padding(AppConstants.spacingLarge)
+                            .background(Color.adaptiveSurface(colorScheme))
+                            .cornerRadius(AppConstants.radiusLarge)
+                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.top, AppConstants.spacingMedium)
+                        } else {
+                            // Start Session Button - Attractive Design
+                            Button {
+                                showStartSession = true
+                            } label: {
+                                HStack(spacing: 16) {
+                                    // Play icon in circle
+                                    ZStack {
+                                        Circle()
+                                            .fill(Color.white.opacity(0.25))
+                                            .frame(width: 44, height: 44)
+
+                                        Image(systemName: "play.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.white)
+                                    }
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Start Session")
+                                            .font(.poppins(18, weight: .bold))
+                                            .foregroundColor(.white)
+
+                                        Text("Begin your spiritual practice")
+                                            .font(.poppins(12, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.8))
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.white.opacity(0.7))
+                                }
+                                .padding(.horizontal, 20)
+                                .padding(.vertical, 16)
+                                .background(
+                                    LinearGradient(
+                                        colors: [.primaryGreen, .primaryGreenDark],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
+                                .cornerRadius(16)
+                                .shadow(color: .primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
+                            }
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.top, AppConstants.spacingMedium)
+                        }
+
                         // Recent Sessions
                         Text("Recent Sessions")
                             .font(.headingSmall)
@@ -152,7 +174,11 @@ struct TrackingView: View {
                         } else {
                             LazyVStack(spacing: AppConstants.spacingSmall) {
                                 ForEach(trackingViewModel.recentSessions) { session in
-                                    SessionRowView(session: session)
+                                    SessionRowView(session: session) {
+                                        Task {
+                                            await trackingViewModel.deleteSession(session)
+                                        }
+                                    }
                                 }
                             }
                             .padding(.horizontal, AppConstants.spacingMedium)
@@ -251,8 +277,10 @@ struct TrackingView: View {
 // MARK: - Session Row View
 struct SessionRowView: View {
     let session: SessionRecord
+    let onDelete: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showDeleteConfirmation: Bool = false
 
     var body: some View {
         HStack(spacing: AppConstants.spacingMedium) {
@@ -264,9 +292,11 @@ struct SessionRowView: View {
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.type.displayName)
+                // Show notes as title if available, otherwise show session type
+                Text(session.notes ?? session.type.displayName)
                     .font(.bodyMedium)
                     .foregroundColor(.adaptiveText(colorScheme))
+                    .lineLimit(1)
 
                 Text(session.formattedDate)
                     .font(.caption)
@@ -286,10 +316,28 @@ struct SessionRowView: View {
                         .font(.caption)
                 }
             }
+
+            // Delete button
+            Button {
+                showDeleteConfirmation = true
+            } label: {
+                Image(systemName: "trash")
+                    .font(.system(size: 16))
+                    .foregroundColor(.red.opacity(0.7))
+                    .frame(width: 32, height: 32)
+            }
         }
         .padding(AppConstants.spacingMedium)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusMedium)
+        .alert("Delete Session", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                onDelete()
+            }
+        } message: {
+            Text("Are you sure you want to delete this session?")
+        }
     }
 }
 
