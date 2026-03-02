@@ -29,13 +29,6 @@ struct CollectionDetailView: View {
                         .font(.poppins(28, weight: .bold))
                         .foregroundColor(.white)
 
-                    // Arabic Name
-                    if let arabicName = collection.nameArabic {
-                        Text(arabicName)
-                            .font(.amiriQuran(20))
-                            .foregroundColor(.white.opacity(0.9))
-                    }
-
                     // Badge pills
                     HStack(spacing: 12) {
                         Text("\(collection.groupCount) groups")

@@ -55,7 +55,7 @@ struct FavouritesView: View {
                         }
                     }
                     .padding(.horizontal, AppConstants.spacingMedium)
-                    .padding(.top, AppConstants.spacingMedium)
+                    .padding(.top, 32)
                     .padding(.bottom, AppConstants.spacingXLarge)
                 }
             }

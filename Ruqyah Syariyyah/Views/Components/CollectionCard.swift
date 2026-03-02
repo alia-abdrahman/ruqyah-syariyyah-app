@@ -20,19 +20,11 @@ struct CollectionCard: View {
 
             Spacer()
 
-            // Arabic Name
-            if let arabic = collection.nameArabic {
-                Text(arabic)
-                    .font(.amiriQuran(16))
-                    .foregroundColor(.adaptiveSecondaryText(colorScheme))
-                    .lineLimit(1)
-            }
-
             // Name
             Text(collection.name)
                 .font(.poppins(15, weight: .semibold))
                 .foregroundColor(.adaptiveText(colorScheme))
-                .lineLimit(2)
+                .lineLimit(3)
                 .fixedSize(horizontal: false, vertical: true)
 
             // Stats
