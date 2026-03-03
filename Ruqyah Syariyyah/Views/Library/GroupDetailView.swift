@@ -17,11 +17,14 @@ struct GroupDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Static Header
-            GradientHeader(
-                title: group.name,
-                subtitle: "\(group.verseCount) verses",
-                showBackButton: true
-            ) {
+            ZStack(alignment: .bottom) {
+                GradientHeader(
+                    title: group.name,
+                    subtitle: "\(group.verseCount) verses",
+                    showBackButton: true
+                )
+                .frame(height: 380)
+
                 HStack(spacing: AppConstants.spacingMedium) {
                     Button {
                         showMushafView = true
@@ -35,7 +38,6 @@ struct GroupDetailView: View {
                             .cornerRadius(AppConstants.radiusSmall)
                     }
 
-                    // Show Play button if verses have audio (local or API via reference)
                     if verses.contains(where: { $0.audioPath != nil || $0.reference != nil }) {
                         Button {
                             playAll()
@@ -50,9 +52,11 @@ struct GroupDetailView: View {
                         }
                     }
                 }
-                .padding(.top, AppConstants.spacingSmall)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 20)
             }
-            .frame(height: 200)
+            .frame(height: 380)
 
             // Scrollable Verses
             ScrollView {
