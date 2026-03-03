@@ -157,17 +157,19 @@ struct GroupRowView: View {
                 Text(group.name)
                     .font(.poppins(16, weight: .semibold))
                     .foregroundColor(.adaptiveText(colorScheme))
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text("\(group.verseCount) verses")
                     .font(.poppins(13, weight: .regular))
                     .foregroundColor(.textSecondary)
             }
+            .layoutPriority(1)
 
             Spacer()
 
-            // Arabic preview
-            if let preview = group.arabicPreview {
-                Text(preview)
+            // Arabic name
+            if let arabicName = group.arabicName {
+                Text(arabicName)
                     .font(.amiriQuran(16))
                     .foregroundColor(.textSecondary)
                     .lineLimit(1)

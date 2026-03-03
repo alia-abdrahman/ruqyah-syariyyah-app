@@ -46,33 +46,50 @@ struct VerseGroup: Identifiable, Codable, Hashable {
     static func formatGroupName(_ fileId: String) -> String {
         // Handle special cases with custom display names
         let specialNames: [String: String] = [
-            "surah_al_baqarah_1_5": "Surah Al-Baqarah (1-5)",
-            "surah_al_baqarah_284_286": "Surah Al-Baqarah (284-286)",
+            "surah_al_baqarah_1_5": "Surah Al-Baqarah\n(1-5)",
+            "surah_al_baqarah_284_286": "Surah Al-Baqarah\n(284-286)",
             "ayat_al_kursi": "Ayat Al-Kursi",
             "pendinding_diri_surah_al_fatihah": "Surah Al-Fatihah",
             "pendinding_kediaman_surah_al_fatihah": "Surah Al-Fatihah",
             "pendinding_kediaman_ayat_al_kursi": "Ayat Al-Kursi",
-            "pendinding_kediaman_surah_yasin_1_9": "Surah Yasin (1-9)",
-            "pendinding_kediaman_surah_taha_111": "Surah Taha (111)",
+            "pendinding_kediaman_surah_yasin_1_9": "Surah Yasin\n(1-9)",
+            "pendinding_kediaman_surah_taha_111": "Surah Taha\n(111)",
             "pendinding_kediaman_zikir_shahatil_wujuh": "Dhikr for Protection",
-            "zikir_doa_pendinding": "Zikir & Doa Pendinding",
-            "surah_al_anbiya_87": "Surah Al-Anbiya' (87)",
-            "surah_al_mukminun_97_98": "Surah Al-Mu'minun (97-98)",
+            // Amalan Pendinding Kediaman with sort order prefixes
+            "pendinding_kediaman_01_surah_al_fatihah": "Surah Al-Fatihah",
+            "pendinding_kediaman_02_ayat_al_kursi": "Ayat Al-Kursi",
+            "pendinding_kediaman_03_surah_yasin_1_9": "Surah Yasin\n(1-9)",
+            "pendinding_kediaman_04_zikir_shahatil_wujuh": "Dhikr for Protection",
+            "pendinding_kediaman_05_surah_taha_111": "Surah Taha\n(111)",
+            "zikir_doa_pendinding": "Protective Dhikr\nand\nSupplications",
+            "surah_al_anbiya_87": "Surah Al-Anbiya'\n(87)",
+            "surah_al_mukminun_97_98": "Surah Al-Mu'minun\n(97-98)",
             "amalan_kendiri_surah_al_fatihah": "Surah Al-Fatihah",
-            "amalan_kendiri_surah_al_baqarah_255_257": "Surah Al-Baqarah (255-257)",
-            "amalan_kendiri_surah_al_hasyr_21_24": "Surah Al-Hasyr (21-24)",
-            "amalan_kendiri_surah_al_mukminun_115_118": "Surah Al-Mu'minun (115-118)",
+            "amalan_kendiri_surah_al_baqarah_255_257": "Surah Al-Baqarah\n(255-257)",
+            "amalan_kendiri_surah_al_hasyr_21_24": "Surah Al-Hasyr\n(21-24)",
+            "amalan_kendiri_surah_al_mukminun_115_118": "Surah Al-Mu'minun\n(115-118)",
+            // Amalan Kendiri with sort order prefixes
+            "amalan_kendiri_01_surah_al_fatihah": "Surah Al-Fatihah",
+            "amalan_kendiri_02_ya_bariu": "Amalan Kendiri Ya Bariu",
+            "amalan_kendiri_03_huruf_muqattaat": "Amalan Kendiri Huruf Muqattaat",
+            "amalan_kendiri_04_selawat_syifa": "Amalan Kendiri Selawat Syifa",
+            "amalan_kendiri_05_selawat_tafrijiyyah": "Amalan Kendiri Selawat Tafrijiyyah",
+            "amalan_kendiri_06_selawat_munjiyat": "Amalan Kendiri Selawat Munjiyat",
+            "amalan_kendiri_07_surah_al_baqarah_255_257": "Surah Al-Baqarah\n(255-257)",
+            "amalan_kendiri_08_surah_al_hasyr_21_24": "Surah Al-Hasyr\n(21-24)",
+            "amalan_kendiri_09_surah_al_mukminun_115_118": "Surah Al-Mu'minun\n(115-118)",
+            "amalan_kendiri_10_ruqyah_jibril": "Amalan Kendiri Ruqyah Jibril",
             // Amalan Pendinding Diri with sort order prefixes
             "pendinding_diri_01_surah_al_fatihah": "Surah Al-Fatihah",
-            "pendinding_diri_02_surah_al_baqarah_1_5": "Surah Al-Baqarah (1-5)",
+            "pendinding_diri_02_surah_al_baqarah_1_5": "Surah Al-Baqarah\n(1-5)",
             "pendinding_diri_03_ayat_al_kursi": "Ayat Al-Kursi",
-            "pendinding_diri_04_surah_al_baqarah_284_286": "Surah Al-Baqarah (284-286)",
+            "pendinding_diri_04_surah_al_baqarah_284_286": "Surah Al-Baqarah\n(284-286)",
             "pendinding_diri_05_surah_al_ikhlas": "Surah Al-Ikhlas",
             "pendinding_diri_06_surah_al_falaq": "Surah Al-Falaq",
             "pendinding_diri_07_surah_an_nas": "Surah An-Nas",
-            "pendinding_diri_08_zikir_doa_pendinding": "Zikir & Doa Pendinding",
-            "pendinding_diri_09_surah_al_anbiya_87": "Surah Al-Anbiya' (87)",
-            "pendinding_diri_10_surah_al_mukminun_97_98": "Surah Al-Mu'minun (97-98)"
+            "pendinding_diri_08_zikir_doa_pendinding": "Protective Dhikr\nand\nSupplications",
+            "pendinding_diri_09_surah_al_anbiya_87": "Surah Al-Anbiya'\n(87)",
+            "pendinding_diri_10_surah_al_mukminun_97_98": "Surah Al-Mu'minun\n(97-98)"
         ]
 
         if let specialName = specialNames[fileId] {
@@ -118,6 +135,35 @@ struct VerseGroup: Identifiable, Codable, Hashable {
         }
 
         return formattedWords.joined(separator: " ")
+    }
+
+    /// Get Arabic name for the group display name
+    var arabicName: String? {
+        let arabicNames: [String: String] = [
+            "Surah Al-Fatihah": "سورة الفاتحة",
+            "Surah Al-Baqarah\n(1-5)": "سورة البقرة",
+            "Surah Al-Baqarah\n(284-286)": "سورة البقرة",
+            "Surah Al-Baqarah\n(255-257)": "سورة البقرة",
+            "Ayat Al-Kursi": "آية الكرسي",
+            "Surah Al-Ikhlas": "سورة الإخلاص",
+            "Surah Al-Falaq": "سورة الفلق",
+            "Surah An-Nas": "سورة الناس",
+            "Surah Yasin\n(1-9)": "سورة يس",
+            "Surah Taha\n(111)": "سورة طه",
+            "Surah Al-Anbiya'\n(87)": "سورة الأنبياء",
+            "Surah Al-Mu'minun\n(97-98)": "سورة المؤمنون",
+            "Surah Al-Mu'minun\n(115-118)": "سورة المؤمنون",
+            "Surah Al-Hasyr\n(21-24)": "سورة الحشر",
+            "Protective Dhikr\nand\nSupplications": "ذكر ودعاء الحماية",
+            "Dhikr for Protection": "ذكر الحماية",
+            "Amalan Kendiri Ya Bariu": "يا بارئ",
+            "Amalan Kendiri Huruf Muqattaat": "حروف مقطعات",
+            "Amalan Kendiri Selawat Syifa": "صلوات الشفاء",
+            "Amalan Kendiri Selawat Tafrijiyyah": "صلوات التفريجية",
+            "Amalan Kendiri Selawat Munjiyat": "صلوات المنجيات",
+            "Amalan Kendiri Ruqyah Jibril": "رقية جبريل",
+        ]
+        return arabicNames[name]
     }
 
     // MARK: - Hashable
