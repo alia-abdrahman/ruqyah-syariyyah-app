@@ -15,7 +15,6 @@ struct SettingsView: View {
                     title: "Settings",
                     subtitle: "Customize your experience"
                 )
-                .frame(height: 160)
 
                 // Scrollable Content
                 ScrollView {

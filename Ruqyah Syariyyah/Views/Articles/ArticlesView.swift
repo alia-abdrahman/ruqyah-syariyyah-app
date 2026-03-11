@@ -12,7 +12,6 @@ struct ArticlesView: View {
                     title: "Articles",
                     subtitle: "Learn and expand your knowledge"
                 )
-                .frame(height: 160)
 
                 // Scrollable Content
                 ScrollView {

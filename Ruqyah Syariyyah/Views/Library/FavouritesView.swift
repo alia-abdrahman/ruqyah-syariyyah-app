@@ -18,7 +18,6 @@ struct FavouritesView: View {
                 subtitle: "\(favorites.count) saved verses",
                 showBackButton: true
             )
-            .frame(height: 160)
 
             // Content
             ScrollView {

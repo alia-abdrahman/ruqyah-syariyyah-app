@@ -17,8 +17,8 @@ struct VerseDetailView: View {
                 // Arabic Text Card
                 VStack(spacing: AppConstants.spacingMedium) {
                     if let number = verse.verseNumber {
-                        Text(number)
-                            .font(.amiriQuran(24))
+                        Text(number.arabicToWesternNumerals)
+                            .font(.poppins(16, weight: .semibold))
                             .foregroundColor(.primaryGreen)
                             .frame(width: 45, height: 45)
                             .background(Color.primaryGreen.opacity(0.1))

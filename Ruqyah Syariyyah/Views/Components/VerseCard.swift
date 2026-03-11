@@ -19,8 +19,8 @@ struct VerseCard: View {
             // Arabic Text
             HStack {
                 if let number = verse.verseNumber {
-                    Text(number)
-                        .font(.amiriQuran(20))
+                    Text(number.arabicToWesternNumerals)
+                        .font(.poppins(13, weight: .semibold))
                         .foregroundColor(.primaryGreen)
                         .frame(width: 35, height: 35)
                         .background(Color.primaryGreen.opacity(0.1))
@@ -128,8 +128,8 @@ struct CompactVerseCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: AppConstants.spacingMedium) {
             if let number = verse.verseNumber {
-                Text(number)
-                    .font(.amiriQuran(16))
+                Text(number.arabicToWesternNumerals)
+                    .font(.poppins(11, weight: .semibold))
                     .foregroundColor(.primaryGreen)
                     .frame(width: 30, height: 30)
                     .background(Color.primaryGreen.opacity(0.1))

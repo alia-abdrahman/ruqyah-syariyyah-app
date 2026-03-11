@@ -34,7 +34,6 @@ struct LibraryView: View {
                         }
                     }
                 )
-                .frame(height: 160)
 
                 // Scrollable Content
                 ScrollView {

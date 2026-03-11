@@ -21,7 +21,6 @@ struct TrackingView: View {
                     title: "Track Your Practice",
                     subtitle: "Build consistency with daily sessions"
                 )
-                .frame(height: 160)
 
                 // Scrollable Content
                 ScrollView {

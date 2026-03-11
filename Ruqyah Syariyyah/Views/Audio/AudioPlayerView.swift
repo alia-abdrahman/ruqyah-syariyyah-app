@@ -23,8 +23,8 @@ struct AudioPlayerView: View {
                     if let verse = audioPlayerViewModel.currentVerse {
                         VStack(spacing: AppConstants.spacingMedium) {
                             if let number = verse.verseNumber {
-                                Text(number)
-                                    .font(.amiriQuran(28))
+                                Text(number.arabicToWesternNumerals)
+                                    .font(.poppins(18, weight: .semibold))
                                     .foregroundColor(.white)
                                     .frame(width: 50, height: 50)
                                     .background(Color.white.opacity(0.2))

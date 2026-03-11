@@ -22,7 +22,7 @@ struct CollectionDetailView: View {
                 VStack(alignment: .leading, spacing: 8) {
                     // Space for status bar and back button
                     Spacer()
-                        .frame(height: 100)
+                        .frame(height: 120)
 
                     // Title
                     Text(collection.name)
