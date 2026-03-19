@@ -1,6 +1,9 @@
-# MyRuqyah - Ruqyah Syar'iyyah
+<p align="center">
+  <i>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</i><br/>
+  Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani.
+</p>
 
-> **Hackathon GodamSahur 2026**
+# Hackathon GodamSahur 2026 - MyRuqyah
 
 Aplikasi pendamping penyembuhan rohani Islam melalui bacaan ayat-ayat Al-Quran dan doa-doa yang sahih.
 
@@ -128,8 +131,3 @@ MyRuqyah/
 Dibangunkan untuk **Hackathon GodamSahur 2026**.
 
 ---
-
-<p align="center">
-  <i>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</i><br/>
-  Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani.
-</p>
