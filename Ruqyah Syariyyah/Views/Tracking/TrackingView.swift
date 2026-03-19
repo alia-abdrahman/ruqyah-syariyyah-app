@@ -304,15 +304,15 @@ struct SessionRowView: View {
 
             Spacer()
 
-            VStack(alignment: .trailing, spacing: 2) {
+            HStack(spacing: 6) {
                 Text(session.formattedDuration)
-                    .font(.bodyMedium)
+                    .font(.poppins(16, weight: .semibold))
                     .foregroundColor(.adaptiveText(colorScheme))
 
                 if session.completed {
                     Image(systemName: "checkmark.circle.fill")
                         .foregroundColor(.primaryGreen)
-                        .font(.caption)
+                        .font(.system(size: 18))
                 }
             }
 

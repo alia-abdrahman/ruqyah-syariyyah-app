@@ -12,67 +12,61 @@ struct CollectionDetailView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Static Header
-            ZStack {
+            VStack(alignment: .leading, spacing: 8) {
+                // Title
+                Text(collection.name)
+                    .font(.poppins(28, weight: .bold))
+                    .foregroundColor(.white)
+
+                // Badge pills
+                HStack(spacing: 12) {
+                    Text("\(collection.groupCount) groups")
+                        .font(.poppins(13, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(20)
+
+                    Text("\(collection.totalVerseCount) verses")
+                        .font(.poppins(13, weight: .medium))
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(20)
+                }
+                .padding(.top, 4)
+
+                // Read All Button
+                Button {
+                    showReadAllView = true
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "book.fill")
+                            .font(.system(size: 14, weight: .semibold))
+                        Text("Read All")
+                            .font(.poppins(14, weight: .semibold))
+                    }
+                    .foregroundColor(.primaryGreen)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(Color.white)
+                    .cornerRadius(25)
+                }
+                .padding(.top, 12)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 120)
+            .padding(.bottom, 20)
+            .background(
                 LinearGradient(
                     colors: [.primaryGreen, .primaryGreenDark],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
-
-                VStack(alignment: .leading, spacing: 8) {
-                    // Space for status bar and back button
-                    Spacer()
-                        .frame(height: 120)
-
-                    // Title
-                    Text(collection.name)
-                        .font(.poppins(28, weight: .bold))
-                        .foregroundColor(.white)
-
-                    // Badge pills
-                    HStack(spacing: 12) {
-                        Text("\(collection.groupCount) groups")
-                            .font(.poppins(13, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(20)
-
-                        Text("\(collection.totalVerseCount) verses")
-                            .font(.poppins(13, weight: .medium))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(20)
-                    }
-                    .padding(.top, 4)
-
-                    // Read All Button
-                    Button {
-                        showReadAllView = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "book.fill")
-                                .font(.system(size: 14, weight: .semibold))
-                            Text("Read All")
-                                .font(.poppins(14, weight: .semibold))
-                        }
-                        .foregroundColor(.primaryGreen)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Color.white)
-                        .cornerRadius(25)
-                    }
-                    .padding(.top, 12)
-
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20)
-            }
-            .frame(height: 320)
+            )
 
             // Scrollable Content
             ScrollView {

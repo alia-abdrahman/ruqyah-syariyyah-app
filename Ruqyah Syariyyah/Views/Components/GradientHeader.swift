@@ -46,7 +46,7 @@ struct GradientHeader<Content: View, TrailingContent: View>: View {
             content()
         }
         .padding(.horizontal, 20)
-        .padding(.top, showBackButton ? 100 : 44)
+        .padding(.top, showBackButton ? 120 : 70)
         .padding(.bottom, 20)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
