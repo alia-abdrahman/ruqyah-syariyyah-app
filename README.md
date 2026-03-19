@@ -3,7 +3,7 @@
   Dengan nama Allah, Yang Maha Pemurah, lagi Maha Mengasihani.
 </p>
 
-# Hackathon GodamSahur 2026 - MyRuqyah
+<h1><span style="color:#00C853">Hackathon GodamSahur 2026 - MyRuqyah</span></h1>
 
 Aplikasi pendamping penyembuhan rohani Islam melalui bacaan ayat-ayat Al-Quran dan doa-doa yang sahih.
 
