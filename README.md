@@ -11,9 +11,7 @@ Aplikasi pendamping penyembuhan rohani Islam melalui bacaan ayat-ayat Al-Quran d
 
 > *Video dipercepatkan (fast-forwarded) untuk tujuan demonstrasi.*
 
-<p align="center">
-  <video src="screenshots/demo.mp4" width="300" controls></video>
-</p>
+https://github.com/alia-abdrahman/ruqyah-syariyyah-app/raw/main/screenshots/demo.mp4
 
 <p align="center">
   <img src="screenshots/01-welcome.png" width="250" />
