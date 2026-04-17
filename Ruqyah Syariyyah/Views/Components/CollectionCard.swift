@@ -44,11 +44,27 @@ struct CollectionCard: View {
     }
 }
 
+// MARK: - Press Effect Button Style
+struct PressEffectButtonStyle: ButtonStyle {
+    var pressedScale: CGFloat = 0.92
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? pressedScale : 1.0)
+            .animation(
+                configuration.isPressed
+                    ? .easeIn(duration: 0.06)
+                    : .interpolatingSpring(stiffness: 250, damping: 8),
+                value: configuration.isPressed
+            )
+    }
+}
+
 #Preview {
     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
         CollectionCard(collection: Collection(
             id: "amalan-pendinding-diri",
-            name: "Amalan Pendinding Diri",
+            name: "Self-Protection Recitations",
             nameArabic: "أعمال حماية النفس",
             description: "Protection prayers",
             icon: "shield",

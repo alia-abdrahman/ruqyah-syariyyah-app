@@ -40,32 +40,38 @@ struct VerseDetailView: View {
 
                 // Translation Card
                 VStack(alignment: .leading, spacing: AppConstants.spacingMedium) {
-                    // Language Toggle
-                    HStack {
-                        Text("Translation")
-                            .font(.headingSmall)
-                            .foregroundColor(.adaptiveText(colorScheme))
-
-                        Spacer()
-
-                        Picker("Language", selection: Binding(
-                            get: { contentViewModel.language },
-                            set: { contentViewModel.setLanguage($0) }
-                        )) {
-                            ForEach(Language.allCases, id: \.self) { lang in
-                                Text(lang.displayName).tag(lang)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .frame(width: 160)
-                    }
+                    Text("Translation")
+                        .font(.headingSmall)
+                        .foregroundColor(.adaptiveText(colorScheme))
 
                     Divider()
 
-                    Text(verse.translation(for: contentViewModel.language))
-                        .font(.bodyLarge)
-                        .foregroundColor(.adaptiveSecondaryText(colorScheme))
-                        .lineSpacing(8)
+                    // English Translation
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("English")
+                            .font(.caption)
+                            .foregroundColor(.adaptiveSecondaryText(colorScheme))
+
+                        Text(verse.translation(for: .english))
+                            .font(.bodyLarge)
+                            .foregroundColor(.adaptiveSecondaryText(colorScheme))
+                            .lineSpacing(8)
+                    }
+
+                    Divider()
+                        .opacity(0.5)
+
+                    // Malay Translation
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Bahasa Melayu")
+                            .font(.caption)
+                            .foregroundColor(.adaptiveSecondaryText(colorScheme))
+
+                        Text(verse.translation(for: .malay))
+                            .font(.bodyLarge)
+                            .foregroundColor(.adaptiveSecondaryText(colorScheme))
+                            .lineSpacing(8)
+                    }
 
                     if let reference = verse.reference {
                         HStack {
@@ -163,16 +169,22 @@ struct VerseDetailView: View {
         let text = """
         \(verse.arabicText)
 
-        \(verse.translation(for: contentViewModel.language))
+        \(verse.translation(for: .english))
+
+        \(verse.translation(for: .malay))
 
         \(verse.reference ?? "")
         """
 
         UIPasteboard.general.string = text
-        isCopied = true
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+            isCopied = true
+        }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            isCopied = false
+            withAnimation(.easeOut(duration: 0.3)) {
+                isCopied = false
+            }
         }
     }
 
@@ -180,7 +192,9 @@ struct VerseDetailView: View {
         let text = """
         \(verse.arabicText)
 
-        \(verse.translation(for: contentViewModel.language))
+        \(verse.translation(for: .english))
+
+        \(verse.translation(for: .malay))
 
         \(verse.reference ?? "")
 
@@ -215,6 +229,7 @@ struct ActionButton: View {
                 Image(systemName: icon)
                     .font(.title2)
                     .foregroundColor(color)
+                    .contentTransition(.symbolEffect(.replace))
 
                 Text(title)
                     .font(.caption)
@@ -225,6 +240,7 @@ struct ActionButton: View {
             .background(Color.adaptiveSurface(colorScheme))
             .cornerRadius(AppConstants.radiusMedium)
         }
+        .buttonStyle(PressEffectButtonStyle(pressedScale: 0.9))
     }
 }
 

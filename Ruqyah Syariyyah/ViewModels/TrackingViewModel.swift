@@ -10,6 +10,8 @@ class TrackingViewModel: ObservableObject {
     @Published var isSessionActive: Bool = false
     @Published var elapsedSeconds: Int = 0
     @Published var isLoading: Bool = false
+    @Published var showSessionComplete: Bool = false
+    @Published var lastCompletedDuration: Int = 0
 
     private var timer: Timer?
     private var modelContext: ModelContext?
@@ -60,12 +62,16 @@ class TrackingViewModel: ObservableObject {
         session.durationSeconds = elapsedSeconds
         session.completed = true
 
+        lastCompletedDuration = elapsedSeconds
+
         await saveSession(session)
 
         currentSession = nil
         isSessionActive = false
         elapsedSeconds = 0
         sessionStartTime = nil
+
+        showSessionComplete = true
     }
 
     func cancelSession() {
@@ -187,6 +193,22 @@ class TrackingViewModel: ObservableObject {
         }
 
         return streak
+    }
+
+    // MARK: - Completion Message
+    var completionMessage: String {
+        let minutes = lastCompletedDuration / 60
+        let streak = currentStreak
+
+        if streak >= 7 {
+            return "MashaAllah! \(streak) days in a row. Your consistency is inspiring."
+        } else if streak >= 3 {
+            return "Alhamdulillah! \(streak)-day streak. Keep it going!"
+        } else if minutes >= 10 {
+            return "Barakallahu feek! A beautiful \(minutes)-minute session."
+        } else {
+            return "Alhamdulillah! Every moment of recitation counts."
+        }
     }
 
     // MARK: - Formatting

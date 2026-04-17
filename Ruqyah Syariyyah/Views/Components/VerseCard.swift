@@ -13,6 +13,7 @@ struct VerseCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var settingsViewModel: SettingsViewModel
     @State private var animatePlay: Bool = false
+    @State private var animateHeart: Bool = false
 
     var body: some View {
         VStack(alignment: .trailing, spacing: AppConstants.spacingMedium) {
@@ -94,11 +95,20 @@ struct VerseCard: View {
                     }
 
                     Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                            animateHeart = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                                animateHeart = false
+                            }
+                        }
                         onFavoriteToggle?()
                     } label: {
                         Image(systemName: isFavorite ? "heart.fill" : "heart")
                             .font(.title2)
                             .foregroundColor(isFavorite ? .red : .textSecondary)
+                            .scaleEffect(animateHeart ? 1.3 : 1.0)
                     }
 
                     Button {

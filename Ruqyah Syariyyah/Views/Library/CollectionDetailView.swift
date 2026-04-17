@@ -185,7 +185,7 @@ struct GroupRowView: View {
     NavigationStack {
         CollectionDetailView(collection: Collection(
             id: "amalan-pendinding-diri",
-            name: "Amalan Pendinding Diri",
+            name: "Self-Protection Recitations",
             nameArabic: "أعمال حماية النفس",
             description: "Protection prayers and verses from the Holy Quran for spiritual shielding",
             icon: "shield",

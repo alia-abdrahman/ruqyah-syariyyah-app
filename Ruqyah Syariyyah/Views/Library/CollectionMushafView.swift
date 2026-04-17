@@ -132,6 +132,23 @@ private struct MushafSurahSection: View {
     let currentPlayingVerse: RuqyahVerse?
     let isPlaying: Bool
 
+    /// Check if the first verse is the Bismillah (بسم الله الرحمن الرحيم)
+    private var hasBismillah: Bool {
+        guard let firstVerse = verses.first else { return false }
+        let text = firstVerse.arabicText.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Check for Bismillah using Unicode scalars to avoid grapheme cluster issues
+        let scalars = Array(text.unicodeScalars)
+        // First scalar should be ba (ب U+0628)
+        guard scalars.first?.value == 0x0628 else { return false }
+        // Should be a short verse (Bismillah only, not a longer verse starting with Bismillah)
+        return scalars.count < 80 && text.contains("\u{0631}\u{064E}\u{0651}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}")
+    }
+
+    /// Verses to display in the main mushaf flow (excluding Bismillah if present)
+    private var mushafVerses: [RuqyahVerse] {
+        hasBismillah ? Array(verses.dropFirst()) : verses
+    }
+
     var body: some View {
         VStack(spacing: AppConstants.spacingMedium) {
             // Surah Title Header
@@ -146,8 +163,24 @@ private struct MushafSurahSection: View {
 
             // Arabic Text Card - Combined Mushaf Style with verse highlighting
             VStack(spacing: 0) {
-                combinedArabicTextWithHighlighting
-                    .padding(AppConstants.spacingLarge)
+                // Bismillah centered at top if present
+                if hasBismillah, let firstVerse = verses.first {
+                    let isCurrentVerse = currentPlayingVerse?.id == firstVerse.id && isPlaying
+
+                    Text(firstVerse.arabicText)
+                        .font(.amiriQuran(28))
+                        .foregroundColor(isCurrentVerse ? .primaryGreen : Color.adaptiveTextColor(colorScheme))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, AppConstants.spacingLarge)
+                        .padding(.bottom, AppConstants.spacingMedium)
+                        .padding(.horizontal, AppConstants.spacingLarge)
+                }
+
+                if !mushafVerses.isEmpty {
+                    combinedArabicTextWithHighlighting
+                        .padding(AppConstants.spacingLarge)
+                }
             }
             .background(Color.adaptiveSurface(colorScheme))
             .cornerRadius(AppConstants.radiusLarge)
@@ -161,7 +194,7 @@ private struct MushafSurahSection: View {
                     .foregroundColor(.adaptiveText(colorScheme))
                     .padding(.bottom, 4)
 
-                ForEach(Array(verses.enumerated()), id: \.element.id) { index, verse in
+                ForEach(Array(mushafVerses.enumerated()), id: \.element.id) { index, verse in
                     let isCurrentVerse = currentPlayingVerse?.id == verse.id && isPlaying
 
                     translationRow(verse: verse, index: index + 1, isHighlighted: isCurrentVerse)
@@ -189,9 +222,11 @@ private struct MushafSurahSection: View {
 
     private func buildAttributedText() -> AttributedString {
         var fullText = AttributedString()
+        let versesToRender = mushafVerses
 
-        for (index, verse) in verses.enumerated() {
-            let verseNumber = verse.verseNumber ?? toArabicNumeral(index + 1)
+        for (index, verse) in versesToRender.enumerated() {
+            let offset = hasBismillah ? index + 2 : index + 1
+            let verseNumber = verse.verseNumber ?? toArabicNumeral(offset)
             let isCurrentVerse = currentPlayingVerse?.id == verse.id && isPlaying
 
             // Verse text - change color to green when playing (contrasts with white bg)
@@ -212,7 +247,7 @@ private struct MushafSurahSection: View {
 
             fullText.append(verseText)
             fullText.append(verseNumberText)
-            if index < verses.count - 1 {
+            if index < versesToRender.count - 1 {
                 fullText.append(spacing)
             }
         }
@@ -282,7 +317,7 @@ extension Color {
 #Preview {
     CollectionMushafView(collection: Collection(
         id: "amalan-pendinding-diri",
-        name: "Amalan Pendinding Diri",
+        name: "Self-Protection Recitations",
         nameArabic: "أعمال حماية النفس",
         description: "Protection prayers and verses from the Holy Quran for spiritual shielding",
         icon: "shield",

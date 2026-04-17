@@ -2,9 +2,11 @@ import SwiftUI
 
 struct LibraryView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var trackingViewModel: TrackingViewModel
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var searchText: String = ""
+    @State private var bouncingCardId: String?
 
     private let columns = [
         GridItem(.flexible(), spacing: AppConstants.spacingMedium),
@@ -17,7 +19,7 @@ struct LibraryView: View {
                 // Static Header with Favourites Button
                 GradientHeader(
                     title: "Library",
-                    subtitle: "Your spiritual healing collection",
+                    subtitle: timeBasedGreeting,
                     trailingContent: {
                         NavigationLink(destination: FavouritesView()) {
                             HStack(spacing: 6) {
@@ -72,10 +74,61 @@ struct LibraryView: View {
         }
     }
 
-    // MARK: - Welcome Banner
+    // MARK: - Time-Based Greeting
+    private var timeBasedGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 3..<12:
+            return "Assalamualaikum, good morning"
+        case 12..<15:
+            return "Assalamualaikum, good afternoon"
+        case 15..<18:
+            return "Assalamualaikum, good evening"
+        case 18..<21:
+            return "Assalamualaikum, have a blessed evening"
+        default:
+            return "Assalamualaikum, peace be upon you"
+        }
+    }
+
+    // MARK: - Contextual Welcome Banner
+    private var welcomeBannerContent: (message: String, icon: String) {
+        let streak = trackingViewModel.currentStreak
+        let totalSessions = trackingViewModel.totalSessions
+
+        if totalSessions == 0 {
+            return (
+                "Begin your spiritual healing journey with the holy verses of the Quran. Start your first session today.",
+                "sparkles"
+            )
+        } else if streak >= 7 {
+            return (
+                "MashaAllah! \(streak) days of consistency. Your dedication to spiritual healing is truly inspiring.",
+                "star.fill"
+            )
+        } else if streak >= 3 {
+            return (
+                "Alhamdulillah, \(streak) days in a row! Keep up your beautiful practice of spiritual healing.",
+                "flame.fill"
+            )
+        } else if streak >= 1 {
+            return (
+                "Welcome back! You practised today. Every recitation brings you closer to healing and peace.",
+                "heart.fill"
+            )
+        } else {
+            return (
+                "Your healing journey continues. Pick up where you left off — every verse recited counts.",
+                "arrow.counterclockwise"
+            )
+        }
+    }
+
     private var welcomeBanner: some View {
-        HStack(spacing: 16) {
-            Text("Begin your Islamic spiritual healing by recitations of holy verses of the Quran.")
+        let content = welcomeBannerContent
+
+        return HStack(spacing: 16) {
+            Text(content.message)
                 .font(.poppins(16, weight: .medium))
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
@@ -88,7 +141,7 @@ struct LibraryView: View {
                     .fill(Color.white.opacity(0.25))
                     .frame(width: 70, height: 70)
 
-                Image(systemName: "book.fill")
+                Image(systemName: content.icon)
                     .font(.system(size: 28, weight: .regular))
                     .foregroundColor(.white)
             }
@@ -110,8 +163,19 @@ struct LibraryView: View {
             ForEach(contentViewModel.collections) { collection in
                 NavigationLink(destination: CollectionDetailView(collection: collection)) {
                     CollectionCard(collection: collection)
+                        .scaleEffect(bouncingCardId == collection.id ? 0.88 : 1.0)
+                        .animation(.interpolatingSpring(stiffness: 600, damping: 10), value: bouncingCardId)
                 }
                 .buttonStyle(.plain)
+                .simultaneousGesture(
+                    TapGesture()
+                        .onEnded {
+                            bouncingCardId = collection.id
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                bouncingCardId = nil
+                            }
+                        }
+                )
             }
         }
         .padding(.horizontal, AppConstants.spacingMedium)
@@ -293,6 +357,7 @@ struct SearchGroupRow: View {
 #Preview {
     LibraryView()
         .environmentObject(ContentViewModel())
+        .environmentObject(TrackingViewModel())
         .environmentObject(SettingsViewModel())
         .environmentObject(AudioPlayerViewModel())
 }

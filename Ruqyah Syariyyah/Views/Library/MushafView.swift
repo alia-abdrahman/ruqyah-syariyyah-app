@@ -14,6 +14,21 @@ struct MushafView: View {
         verses.first?.group ?? "Verses"
     }
 
+    /// Check if the first verse is the Bismillah
+    private var hasBismillah: Bool {
+        guard let firstVerse = verses.first else { return false }
+        let text = firstVerse.arabicText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let scalars = Array(text.unicodeScalars)
+        // First scalar should be ba (ب U+0628), and short enough to be just Bismillah
+        guard scalars.first?.value == 0x0628, scalars.count < 80 else { return false }
+        return text.contains("\u{0631}\u{064E}\u{0651}\u{062D}\u{0650}\u{064A}\u{0645}\u{0650}")
+    }
+
+    /// Verses to display in the main mushaf flow (excluding Bismillah if present)
+    private var mushafVerses: [RuqyahVerse] {
+        hasBismillah ? Array(verses.dropFirst()) : verses
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottom) {
@@ -77,9 +92,23 @@ struct MushafView: View {
 
                             // Arabic Text Card - All verses combined
                             VStack(spacing: 0) {
-                                // Combined Arabic text with verse numbers
-                                combinedArabicText
-                                    .padding(AppConstants.spacingLarge)
+                                // Bismillah centered at top if present
+                                if hasBismillah, let firstVerse = verses.first {
+                                    Text(firstVerse.arabicText)
+                                        .font(.amiriQuran(26))
+                                        .foregroundColor(.adaptiveText(colorScheme))
+                                        .multilineTextAlignment(.center)
+                                        .frame(maxWidth: .infinity)
+                                        .padding(.top, AppConstants.spacingLarge)
+                                        .padding(.bottom, AppConstants.spacingMedium)
+                                        .padding(.horizontal, AppConstants.spacingLarge)
+                                }
+
+                                // Remaining verses in mushaf style
+                                if !mushafVerses.isEmpty {
+                                    combinedArabicText
+                                        .padding(AppConstants.spacingLarge)
+                                }
                             }
                             .background(Color.adaptiveSurface(colorScheme))
                             .cornerRadius(AppConstants.radiusLarge)
@@ -93,7 +122,7 @@ struct MushafView: View {
                                     .foregroundColor(.adaptiveText(colorScheme))
                                     .padding(.bottom, 4)
 
-                                ForEach(Array(verses.enumerated()), id: \.element.id) { index, verse in
+                                ForEach(Array(mushafVerses.enumerated()), id: \.element.id) { index, verse in
                                     translationRow(verse: verse, index: index + 1)
                                 }
                             }
@@ -130,9 +159,10 @@ struct MushafView: View {
 
     // MARK: - Combined Arabic Text with Verse Numbers
     private var combinedArabicText: some View {
-        // Build attributed text with verse numbers
-        let combinedText = verses.enumerated().map { index, verse in
-            let verseNumber = verse.verseNumber ?? toArabicNumeral(index + 1)
+        // Build attributed text with verse numbers (excluding Bismillah if separated)
+        let combinedText = mushafVerses.enumerated().map { index, verse in
+            let offset = hasBismillah ? index + 2 : index + 1
+            let verseNumber = verse.verseNumber ?? toArabicNumeral(offset)
             return "\(verse.arabicText) ﴿\(verseNumber)﴾"
         }.joined(separator: " ")
 
