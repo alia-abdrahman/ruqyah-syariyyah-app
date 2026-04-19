@@ -104,6 +104,37 @@ class StorageService: ObservableObject {
         }
     }
 
+    // MARK: - Last Read Position
+    var lastReadCollectionId: String? {
+        get { defaults.string(forKey: AppConstants.Keys.lastReadCollectionId) }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadCollectionId) }
+    }
+
+    var lastReadGroupName: String? {
+        get { defaults.string(forKey: AppConstants.Keys.lastReadGroupName) }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadGroupName) }
+    }
+
+    var lastReadCollectionName: String? {
+        get { defaults.string(forKey: AppConstants.Keys.lastReadCollectionName) }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadCollectionName) }
+    }
+
+    var lastReadGroupDisplayName: String? {
+        get { defaults.string(forKey: AppConstants.Keys.lastReadGroupDisplayName) }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadGroupDisplayName) }
+    }
+
+    var lastReadMode: String? {
+        get { defaults.string(forKey: AppConstants.Keys.lastReadMode) }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadMode) }
+    }
+
+    var lastReadDate: Date? {
+        get { defaults.object(forKey: AppConstants.Keys.lastReadDate) as? Date }
+        set { defaults.set(newValue, forKey: AppConstants.Keys.lastReadDate) }
+    }
+
     // MARK: - Reset
     func resetAll() {
         let keys = [
@@ -114,7 +145,13 @@ class StorageService: ObservableObject {
             AppConstants.Keys.reminderTime,
             AppConstants.Keys.arabicTextSize,
             AppConstants.Keys.lastAudioPosition,
-            AppConstants.Keys.lastAudioId
+            AppConstants.Keys.lastAudioId,
+            AppConstants.Keys.lastReadCollectionId,
+            AppConstants.Keys.lastReadGroupName,
+            AppConstants.Keys.lastReadCollectionName,
+            AppConstants.Keys.lastReadGroupDisplayName,
+            AppConstants.Keys.lastReadMode,
+            AppConstants.Keys.lastReadDate
         ]
 
         for key in keys {

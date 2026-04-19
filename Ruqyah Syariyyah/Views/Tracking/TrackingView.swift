@@ -19,7 +19,8 @@ struct TrackingView: View {
                 // Static Header
                 GradientHeader(
                     title: "Track Your Practice",
-                    subtitle: trackingSubtitle
+                    subtitle: trackingSubtitle,
+                    style: .plain
                 )
 
                 // Scrollable Content
@@ -107,7 +108,7 @@ struct TrackingView: View {
                             .padding(AppConstants.spacingLarge)
                             .background(Color.adaptiveSurface(colorScheme))
                             .cornerRadius(AppConstants.radiusLarge)
-                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
                             .padding(.horizontal, AppConstants.spacingMedium)
                             .padding(.top, AppConstants.spacingMedium)
                         } else {
@@ -153,7 +154,7 @@ struct TrackingView: View {
                                     )
                                 )
                                 .cornerRadius(16)
-                                .shadow(color: .primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
+                                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
                             }
                             .padding(.horizontal, AppConstants.spacingMedium)
                             .padding(.top, AppConstants.spacingMedium)
@@ -343,7 +344,7 @@ struct TrackingView: View {
             .padding(.vertical, 10)
             .background(Color.adaptiveSurface(colorScheme))
             .cornerRadius(AppConstants.radiusXLarge)
-            .shadow(color: .black.opacity(0.15), radius: 20)
+            .shadow(color: .black.opacity(0.1), radius: 20)
             .padding(.horizontal, 40)
         }
     }

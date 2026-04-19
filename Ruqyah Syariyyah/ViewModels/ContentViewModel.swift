@@ -23,6 +23,7 @@ class ContentViewModel: ObservableObject {
         self.modelContext = context
         Task {
             await loadFavorites()
+            await loadBookmarks()
         }
     }
 
@@ -37,6 +38,7 @@ class ContentViewModel: ObservableObject {
             allVerses = content.verses
             groupsByCollection = content.groupsByCollection
             print("Loaded \(collections.count) collections and \(allVerses.count) verses")
+            scheduleDailyVerseNotification()
         } catch {
             print("Error loading content: \(error)")
             // Load sample data as fallback
@@ -97,6 +99,32 @@ class ContentViewModel: ObservableObject {
 
     var favoriteVerses: [RuqyahVerse] {
         allVerses.filter { favoriteVerseKeys.contains($0.uniqueKey) }
+    }
+
+    // MARK: - Daily Verse
+    private var protectiveDhikrVerses: [RuqyahVerse] {
+        allVerses.filter { $0.group.contains("Protective Dhikr") }
+    }
+
+    var dailyVerse: RuqyahVerse? {
+        let verses = protectiveDhikrVerses
+        guard !verses.isEmpty else { return nil }
+        let dayOfYear = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 1
+        let index = dayOfYear % verses.count
+        return verses[index]
+    }
+
+    func scheduleDailyVerseNotification() {
+        guard StorageService.shared.reminderEnabled,
+              let verse = dailyVerse else { return }
+
+        let time = StorageService.shared.reminderTime
+        let translation = verse.translation(for: language)
+        NotificationService.shared.scheduleDailyVerseNotification(
+            at: time,
+            verseText: verse.arabicText,
+            translation: translation
+        )
     }
 
     // MARK: - Search
@@ -238,6 +266,148 @@ class ContentViewModel: ObservableObject {
             try context.save()
         } catch {
             print("Error removing favorite: \(error)")
+        }
+    }
+
+    // MARK: - Last Read Position
+    struct LastReadInfo {
+        let collectionId: String
+        let groupName: String?
+        let collectionName: String
+        let groupDisplayName: String?
+        let mode: String
+        let date: Date
+    }
+
+    var lastReadInfo: LastReadInfo? {
+        guard let collectionId = StorageService.shared.lastReadCollectionId,
+              let collectionName = StorageService.shared.lastReadCollectionName,
+              let mode = StorageService.shared.lastReadMode,
+              let date = StorageService.shared.lastReadDate else { return nil }
+
+        return LastReadInfo(
+            collectionId: collectionId,
+            groupName: StorageService.shared.lastReadGroupName,
+            collectionName: collectionName,
+            groupDisplayName: StorageService.shared.lastReadGroupDisplayName,
+            mode: mode,
+            date: date
+        )
+    }
+
+    func saveLastRead(collectionId: String, groupName: String?, collectionName: String, groupDisplayName: String?, mode: String) {
+        StorageService.shared.lastReadCollectionId = collectionId
+        StorageService.shared.lastReadGroupName = groupName
+        StorageService.shared.lastReadCollectionName = collectionName
+        StorageService.shared.lastReadGroupDisplayName = groupDisplayName
+        StorageService.shared.lastReadMode = mode
+        StorageService.shared.lastReadDate = Date()
+        objectWillChange.send()
+    }
+
+    func clearLastRead() {
+        StorageService.shared.lastReadCollectionId = nil
+        StorageService.shared.lastReadGroupName = nil
+        StorageService.shared.lastReadCollectionName = nil
+        StorageService.shared.lastReadGroupDisplayName = nil
+        StorageService.shared.lastReadMode = nil
+        StorageService.shared.lastReadDate = nil
+        objectWillChange.send()
+    }
+
+    // MARK: - Bookmarks
+    @Published var bookmarkKeys: Set<String> = []
+
+    func loadBookmarks() async {
+        guard let context = modelContext else { return }
+
+        do {
+            let descriptor = FetchDescriptor<ReadingBookmark>()
+            let bookmarks = try context.fetch(descriptor)
+            bookmarkKeys = Set(bookmarks.map { $0.bookmarkKey })
+        } catch {
+            print("Error loading bookmarks: \(error)")
+        }
+    }
+
+    var allBookmarks: [ReadingBookmark] {
+        guard let context = modelContext else { return [] }
+
+        do {
+            let descriptor = FetchDescriptor<ReadingBookmark>(
+                sortBy: [SortDescriptor(\.dateBookmarked, order: .reverse)]
+            )
+            return try context.fetch(descriptor)
+        } catch {
+            print("Error fetching bookmarks: \(error)")
+            return []
+        }
+    }
+
+    func isBookmarked(collectionId: String, groupName: String) -> Bool {
+        bookmarkKeys.contains("\(collectionId)_\(groupName)")
+    }
+
+    func toggleBookmark(collectionId: String, groupName: String, collectionName: String, groupDisplayName: String) async {
+        let key = "\(collectionId)_\(groupName)"
+
+        if bookmarkKeys.contains(key) {
+            bookmarkKeys.remove(key)
+            await removeBookmark(key)
+            // Clear "Continue Reading" if it matches the unbookmarked item
+            if let lastRead = lastReadInfo,
+               lastRead.collectionId == collectionId {
+                clearLastRead()
+            }
+        } else {
+            bookmarkKeys.insert(key)
+            await addBookmark(collectionId: collectionId, groupName: groupName, collectionName: collectionName, groupDisplayName: groupDisplayName)
+        }
+    }
+
+    private func addBookmark(collectionId: String, groupName: String, collectionName: String, groupDisplayName: String) async {
+        guard let context = modelContext else { return }
+
+        let bookmark = ReadingBookmark(collectionId: collectionId, groupName: groupName, collectionName: collectionName, groupDisplayName: groupDisplayName)
+        context.insert(bookmark)
+
+        do {
+            try context.save()
+        } catch {
+            print("Error saving bookmark: \(error)")
+        }
+    }
+
+    private func removeBookmark(_ key: String) async {
+        guard let context = modelContext else { return }
+
+        do {
+            let descriptor = FetchDescriptor<ReadingBookmark>(
+                predicate: #Predicate { $0.bookmarkKey == key }
+            )
+            let bookmarks = try context.fetch(descriptor)
+            for bookmark in bookmarks {
+                context.delete(bookmark)
+            }
+            try context.save()
+        } catch {
+            print("Error removing bookmark: \(error)")
+        }
+    }
+
+    func deleteBookmark(_ bookmark: ReadingBookmark) async {
+        guard let context = modelContext else { return }
+        bookmarkKeys.remove(bookmark.bookmarkKey)
+        context.delete(bookmark)
+        do {
+            try context.save()
+        } catch {
+            print("Error deleting bookmark: \(error)")
+        }
+        // Clear "Continue Reading" if it matches
+        if let lastRead = lastReadInfo,
+           lastRead.collectionId == bookmark.collectionId {
+            clearLastRead()
         }
     }
 

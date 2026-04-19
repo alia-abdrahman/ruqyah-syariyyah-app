@@ -14,6 +14,11 @@ struct GroupDetailView: View {
         contentViewModel.getVersesForGroup(group.collectionId, groupName: group.name)
     }
 
+    /// Whether this group has playable audio (not dhikr/dua without audio files)
+    private var groupHasAudio: Bool {
+        !AppConstants.noAudioGroups.contains(group.name)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             // Static Header
@@ -35,7 +40,7 @@ struct GroupDetailView: View {
                             .cornerRadius(AppConstants.radiusSmall)
                     }
 
-                    if verses.contains(where: { $0.audioPath != nil || $0.reference != nil }) {
+                    if groupHasAudio && verses.contains(where: { $0.audioPath != nil || $0.reference != nil }) {
                         Button {
                             playAll()
                         } label: {
@@ -55,6 +60,8 @@ struct GroupDetailView: View {
             // Scrollable Verses
             ScrollView {
                 LazyVStack(spacing: AppConstants.spacingMedium) {
+                    Color.clear.frame(height: 1).id("scrollTop")
+
                     ForEach(verses) { verse in
                         NavigationLink(destination: VerseDetailView(verse: verse)) {
                             VerseCard(
@@ -62,13 +69,13 @@ struct GroupDetailView: View {
                                 isFavorite: contentViewModel.isFavorite(verse),
                                 language: contentViewModel.language,
                                 isPlaying: audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying,
+                                showPlayButton: groupHasAudio,
                                 onFavoriteToggle: {
                                     Task {
                                         await contentViewModel.toggleFavorite(verse)
                                     }
                                 },
                                 onPlay: {
-                                    // Toggle play/pause for this verse
                                     if audioPlayerViewModel.currentVerse?.id == verse.id && audioPlayerViewModel.isPlaying {
                                         audioPlayerViewModel.pause()
                                     } else {
@@ -81,12 +88,28 @@ struct GroupDetailView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .bounceOnTap()
                     }
+
+                    // End of list
+                    VStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 18))
+                            .foregroundColor(.textSecondary.opacity(0.4))
+                        Text("You've reached the end")
+                            .font(.poppins(12, weight: .regular))
+                            .foregroundColor(.textSecondary.opacity(0.4))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, AppConstants.spacingMedium)
+                    .padding(.bottom, 80)
+                    .id("scrollBottom")
                 }
                 .padding(.horizontal, AppConstants.spacingMedium)
                 .padding(.top, AppConstants.spacingMedium)
-                .padding(.bottom, AppConstants.spacingMedium)
+                .padding(.bottom, AppConstants.spacingXLarge)
             }
+            .withScrollButtons()
         }
         .background(Color.adaptiveBackground(colorScheme))
         .ignoresSafeArea(edges: .top)
@@ -122,26 +145,7 @@ struct GroupDetailView: View {
     }
 
     private func shareVerse(_ verse: RuqyahVerse) {
-        let text = """
-        \(verse.arabicText)
-
-        \(verse.translation(for: contentViewModel.language))
-
-        \(verse.reference ?? "")
-
-        - Ruqyah Syar'iyyah App
-        """
-
-        let activityVC = UIActivityViewController(
-            activityItems: [text],
-            applicationActivities: nil
-        )
-
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first,
-           let rootVC = window.rootViewController {
-            rootVC.present(activityVC, animated: true)
-        }
+        shareVerseAsImage(verse, colorScheme: colorScheme)
     }
 }
 

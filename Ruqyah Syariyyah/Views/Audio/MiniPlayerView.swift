@@ -28,11 +28,23 @@ struct MiniPlayerView: View {
                             .foregroundColor(.adaptiveText(colorScheme))
                             .lineLimit(1)
 
-                        if let reference = verse.reference {
-                            Text(reference)
-                                .font(.caption)
-                                .foregroundColor(.textSecondary)
-                                .lineLimit(1)
+                        HStack(spacing: 6) {
+                            if let reference = verse.reference {
+                                Text(reference)
+                                    .font(.caption)
+                                    .foregroundColor(.textSecondary)
+                                    .lineLimit(1)
+                            }
+
+                            if audioPlayerViewModel.repeatCount > 0 {
+                                HStack(spacing: 3) {
+                                    Image(systemName: "repeat")
+                                        .font(.system(size: 10))
+                                    Text("\(audioPlayerViewModel.currentRepeat + 1)/\(audioPlayerViewModel.repeatCount)")
+                                        .font(.system(size: 11, weight: .medium))
+                                }
+                                .foregroundColor(.primaryGreen)
+                            }
                         }
                     }
                 }
@@ -62,7 +74,7 @@ struct MiniPlayerView: View {
             .padding(.vertical, AppConstants.spacingSmall)
         }
         .background(Color.adaptiveSurface(colorScheme))
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: -2)
+        .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: -3)
         .onTapGesture {
             showFullPlayer = true
         }

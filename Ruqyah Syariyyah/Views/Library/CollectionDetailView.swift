@@ -71,6 +71,8 @@ struct CollectionDetailView: View {
             // Scrollable Content
             ScrollView {
                 VStack(spacing: AppConstants.spacingMedium) {
+                    Color.clear.frame(height: 1).id("scrollTop")
+
                     // Description Card
                     if let description = collection.description, !description.isEmpty {
                         Text(description)
@@ -90,10 +92,28 @@ struct CollectionDetailView: View {
                             GroupRowView(group: group, index: index + 1)
                         }
                         .buttonStyle(.plain)
+                        .bounceOnTap()
                     }
+
+                    // End of list
+                    VStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle")
+                            .font(.system(size: 18))
+                            .foregroundColor(.textSecondary.opacity(0.4))
+                        Text("You've reached the end")
+                            .font(.poppins(12, weight: .regular))
+                            .foregroundColor(.textSecondary.opacity(0.4))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, AppConstants.spacingMedium)
+                    .padding(.bottom, 80)
+                    .id("scrollBottom")
                 }
-                .padding(AppConstants.spacingMedium)
+                .padding(.horizontal, AppConstants.spacingMedium)
+                .padding(.top, AppConstants.spacingMedium)
+                .padding(.bottom, AppConstants.spacingXLarge)
             }
+            .withScrollButtons()
         }
         .background(Color.adaptiveBackground(colorScheme))
         .ignoresSafeArea(edges: .top)
@@ -177,7 +197,7 @@ struct GroupRowView: View {
         .padding(AppConstants.spacingMedium)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusLarge)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
     }
 }
 
