@@ -28,8 +28,12 @@ struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            Color.primaryGreen
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [.primaryGreen, .primaryGreenDark],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 0) {
                 Spacer()

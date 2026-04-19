@@ -13,6 +13,7 @@ struct RuqyahVerse: Identifiable, Codable, Hashable {
     let audioPath: String?
     let verseNumber: String?
     let sortOrder: Int
+    let recommendedRepetitions: Int?
 
     // Computed unique key for identification
     var uniqueKey: String {
@@ -34,6 +35,7 @@ struct RuqyahVerse: Identifiable, Codable, Hashable {
         case audioPath
         case verseNumber
         case sortOrder
+        case recommendedRepetitions
     }
 
     init(
@@ -46,7 +48,8 @@ struct RuqyahVerse: Identifiable, Codable, Hashable {
         reference: String? = nil,
         audioPath: String? = nil,
         verseNumber: String? = nil,
-        sortOrder: Int = 0
+        sortOrder: Int = 0,
+        recommendedRepetitions: Int? = nil
     ) {
         self.arabicText = arabicText
         self.englishTranslation = englishTranslation
@@ -58,6 +61,7 @@ struct RuqyahVerse: Identifiable, Codable, Hashable {
         self.audioPath = audioPath
         self.verseNumber = verseNumber
         self.sortOrder = sortOrder
+        self.recommendedRepetitions = recommendedRepetitions
     }
 
     init(from decoder: Decoder) throws {
@@ -72,6 +76,7 @@ struct RuqyahVerse: Identifiable, Codable, Hashable {
         audioPath = try container.decodeIfPresent(String.self, forKey: .audioPath)
         verseNumber = try container.decodeIfPresent(String.self, forKey: .verseNumber)
         sortOrder = try container.decodeIfPresent(Int.self, forKey: .sortOrder) ?? 0
+        recommendedRepetitions = try container.decodeIfPresent(Int.self, forKey: .recommendedRepetitions)
     }
 
     // MARK: - Translation Helper

@@ -7,6 +7,7 @@ struct StatCard: View {
     var color: Color = .primaryGreen
 
     @Environment(\.colorScheme) private var colorScheme
+    @State private var appeared: Bool = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppConstants.spacingSmall) {
@@ -14,6 +15,8 @@ struct StatCard: View {
                 Image(systemName: icon)
                     .font(.title3)
                     .foregroundColor(color)
+                    .scaleEffect(appeared ? 1.0 : 0.5)
+                    .opacity(appeared ? 1.0 : 0)
 
                 Spacer()
             }
@@ -30,7 +33,12 @@ struct StatCard: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusLarge)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6).delay(0.1)) {
+                appeared = true
+            }
+        }
     }
 }
 
@@ -85,7 +93,7 @@ struct LargeStatCard: View {
         .padding(AppConstants.spacingMedium)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusLarge)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
     }
 }
 

@@ -61,3 +61,23 @@ final class FavoriteVerse {
         self.dateAdded = dateAdded
     }
 }
+
+// MARK: - Reading Bookmark Model
+@Model
+final class ReadingBookmark {
+    @Attribute(.unique) var bookmarkKey: String
+    var collectionId: String
+    var groupName: String
+    var collectionName: String
+    var groupDisplayName: String
+    var dateBookmarked: Date
+
+    init(collectionId: String, groupName: String, collectionName: String, groupDisplayName: String) {
+        self.bookmarkKey = "\(collectionId)_\(groupName)"
+        self.collectionId = collectionId
+        self.groupName = groupName
+        self.collectionName = collectionName
+        self.groupDisplayName = groupDisplayName
+        self.dateBookmarked = Date()
+    }
+}

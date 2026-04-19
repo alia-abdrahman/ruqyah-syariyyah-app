@@ -13,7 +13,8 @@ struct SettingsView: View {
                 // Static Header
                 GradientHeader(
                     title: "Settings",
-                    subtitle: "Customize your experience"
+                    subtitle: "Customize your experience",
+                    style: .plain
                 )
 
                 // Scrollable Content
@@ -157,6 +158,79 @@ struct SettingsView: View {
                             }
                         }
 
+                        // Support Section
+                        SettingsSection(title: "Support") {
+                            SettingsRow {
+                                Button {
+                                    shareApp()
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "square.and.arrow.up")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.primaryGreen)
+                                            .frame(width: 28)
+
+                                        Text("Share App")
+                                            .font(.poppins(15, weight: .regular))
+                                            .foregroundColor(.adaptiveText(colorScheme))
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.textSecondary)
+                                    }
+                                }
+                            }
+
+                            Divider()
+
+                            SettingsRow {
+                                Link(destination: URL(string: "https://apps.apple.com/app/id6760955875")!) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "star.fill")
+                                            .font(.system(size: 18))
+                                            .foregroundColor(.accentGold)
+                                            .frame(width: 28)
+
+                                        Text("Rate App")
+                                            .font(.poppins(15, weight: .regular))
+                                            .foregroundColor(.adaptiveText(colorScheme))
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.textSecondary)
+                                    }
+                                }
+                            }
+
+                            Divider()
+
+                            SettingsRow {
+                                Link(destination: URL(string: "https://buymeacoffee.com/codedancoffee")!) {
+                                    HStack(spacing: 12) {
+                                        Text("☕")
+                                            .font(.system(size: 22))
+                                            .frame(width: 28)
+
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("Buy Me a Coffee")
+                                                .font(.poppins(15, weight: .regular))
+                                                .foregroundColor(.adaptiveText(colorScheme))
+                                        }
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.system(size: 14))
+                                            .foregroundColor(.textSecondary)
+                                    }
+                                }
+                            }
+                        }
+
                         // Reset Section
                         SettingsSection(title: "Data") {
                             SettingsRow {
@@ -192,6 +266,26 @@ struct SettingsView: View {
             } message: {
                 Text("This will reset all settings to their default values. This action cannot be undone.")
             }
+        }
+    }
+
+    private func shareApp() {
+        let appURL = URL(string: "https://apps.apple.com/app/id6760955875")!
+        let text = "Check out MyRuqyah - an app for spiritual healing through Quran and Sunnah."
+        let activityVC = UIActivityViewController(
+            activityItems: [text, appURL],
+            applicationActivities: nil
+        )
+
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first,
+           let rootVC = window.rootViewController {
+            if let popover = activityVC.popoverPresentationController {
+                popover.sourceView = window
+                popover.sourceRect = CGRect(x: window.bounds.midX, y: window.bounds.midY, width: 0, height: 0)
+                popover.permittedArrowDirections = []
+            }
+            rootVC.present(activityVC, animated: true)
         }
     }
 }

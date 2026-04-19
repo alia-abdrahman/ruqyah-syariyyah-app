@@ -2,9 +2,9 @@ import SwiftUI
 
 extension Color {
     // MARK: - Primary Colors
-    static let primaryGreen = Color(hex: "10B981")
-    static let primaryGreenLight = Color(hex: "34D399")
-    static let primaryGreenDark = Color(hex: "059669")
+    static let primaryGreen = Color(hex: "2D6A4F")
+    static let primaryGreenLight = Color(hex: "86C5A3")
+    static let primaryGreenDark = Color(hex: "1B4D36")
 
     // MARK: - Accent Colors
     static let accentPurple = Color(hex: "8B5CF6")
@@ -25,10 +25,10 @@ extension Color {
     static let textDark = Color.white
     static let textDarkSecondary = Color(hex: "9CA3AF")
 
-    // MARK: - Gradient
+    // MARK: - Gradients
     static var primaryGradient: LinearGradient {
         LinearGradient(
-            colors: [primaryGreen, primaryGreenLight],
+            colors: [primaryGreenLight, primaryGreen],
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
@@ -37,9 +37,24 @@ extension Color {
     static var headerGradient: LinearGradient {
         LinearGradient(
             colors: [primaryGreen, primaryGreenDark],
-            startPoint: .top,
-            endPoint: .bottom
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
         )
+    }
+
+    static var verseCardGradient: LinearGradient {
+        LinearGradient(
+            colors: [Color(hex: "B5D8C7"), Color(hex: "5BA88A"), Color(hex: "2D6A4F")],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    static let mintBackgroundLight = Color(hex: "EEF6F1")
+    static let mintBackgroundDark = Color(hex: "1A2E24")
+
+    static func adaptiveMint(_ colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? mintBackgroundDark : mintBackgroundLight
     }
 
     // MARK: - Hex Initializer

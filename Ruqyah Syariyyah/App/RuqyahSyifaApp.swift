@@ -11,7 +11,8 @@ struct RuqyahSyifaApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             FavoriteVerse.self,
-            SessionRecord.self
+            SessionRecord.self,
+            ReadingBookmark.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -22,14 +23,24 @@ struct RuqyahSyifaApp: App {
         }
     }()
 
+    @State private var showSplash: Bool = true
+
     var body: some Scene {
         WindowGroup {
-            MainTabView()
-                .environmentObject(contentViewModel)
-                .environmentObject(trackingViewModel)
-                .environmentObject(audioPlayerViewModel)
-                .environmentObject(settingsViewModel)
-                .preferredColorScheme(settingsViewModel.colorScheme)
+            ZStack {
+                MainTabView()
+                    .environmentObject(contentViewModel)
+                    .environmentObject(trackingViewModel)
+                    .environmentObject(audioPlayerViewModel)
+                    .environmentObject(settingsViewModel)
+                    .preferredColorScheme(settingsViewModel.colorScheme)
+
+                if showSplash {
+                    SplashView(isActive: $showSplash)
+                        .transition(.opacity)
+                        .zIndex(1)
+                }
+            }
         }
         .modelContainer(sharedModelContainer)
     }

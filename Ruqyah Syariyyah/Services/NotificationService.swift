@@ -69,6 +69,38 @@ class NotificationService: ObservableObject {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_reminder"])
     }
 
+    // MARK: - Daily Verse Notification
+    func scheduleDailyVerseNotification(at time: Date, verseText: String, translation: String) {
+        cancelDailyVerseNotification()
+
+        let content = UNMutableNotificationContent()
+        content.title = "Verse of the Day"
+        content.subtitle = verseText
+        content.body = translation
+        content.sound = .default
+
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.hour, .minute], from: time)
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+
+        let request = UNNotificationRequest(
+            identifier: "daily_verse",
+            content: content,
+            trigger: trigger
+        )
+
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule daily verse notification: \(error)")
+            }
+        }
+    }
+
+    func cancelDailyVerseNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["daily_verse"])
+    }
+
     // MARK: - Session Reminder
     func scheduleSessionReminder(afterMinutes minutes: Int, title: String = "Session Complete", body: String = "Your Ruqyah session timer has ended") {
         let content = UNMutableNotificationContent()

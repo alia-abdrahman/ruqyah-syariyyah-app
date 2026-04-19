@@ -82,7 +82,8 @@ actor DataLoaderService {
                             reference: verseData.reference,
                             audioPath: verseData.audioPath,
                             verseNumber: verseData.verseNumber,
-                            sortOrder: index
+                            sortOrder: index,
+                            recommendedRepetitions: verseData.recommendedRepetitions
                         )
                         allVerses.append(verse)
                     }
@@ -183,6 +184,7 @@ private struct VerseJSONData: Codable {
     let reference: String?
     let audioPath: String?
     let verseNumber: String?
+    let recommendedRepetitions: Int?
 }
 
 // MARK: - Errors

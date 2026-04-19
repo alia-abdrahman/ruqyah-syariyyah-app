@@ -12,6 +12,8 @@ class AudioPlayerViewModel: ObservableObject {
     @Published var showMiniPlayer: Bool = false
     @Published var isLoading: Bool = false
     @Published var error: String?
+    @Published var repeatCount: Int = 0     // Total repeats requested (0 = no repeat)
+    @Published var currentRepeat: Int = 0   // Current repeat iteration
 
     private let audioService = AudioService.shared
     private let quranAudioService = QuranAudioService.shared
@@ -61,6 +63,21 @@ class AudioPlayerViewModel: ObservableObject {
     }
 
     private func handlePlaybackEnded() {
+        // Check repeat mode first — replay same verse if repeats remain
+        if repeatCount > 0 && currentRepeat < repeatCount - 1 {
+            currentRepeat += 1
+            if let verse = currentVerse {
+                playVerse(verse)
+            }
+            return
+        }
+
+        // Reset repeat state when done
+        if repeatCount > 0 {
+            repeatCount = 0
+            currentRepeat = 0
+        }
+
         // Auto-play next verse only if autoPlayNext is enabled (e.g., Play All mode)
         if autoPlayNext && hasNext {
             playNext()
@@ -157,7 +174,33 @@ class AudioPlayerViewModel: ObservableObject {
         autoPlayNext = false
         verses = []
         currentIndex = 0
+        repeatCount = 0
+        currentRepeat = 0
         playVerse(verse)
+    }
+
+    /// Play a verse with repeat mode (replays `times` total)
+    func playWithRepeat(_ verse: RuqyahVerse, times: Int) {
+        autoPlayNext = false
+        verses = []
+        currentIndex = 0
+        repeatCount = times
+        currentRepeat = 0
+        playVerse(verse)
+    }
+
+    /// Set repeat count mid-playback (0 = off)
+    func setRepeatCount(_ count: Int) {
+        if count == 0 {
+            repeatCount = 0
+            currentRepeat = 0
+        } else {
+            repeatCount = count
+            // Keep currentRepeat if already in progress, but cap it
+            if currentRepeat >= count {
+                currentRepeat = count - 1
+            }
+        }
     }
 
     func playNext() {

@@ -2,9 +2,11 @@ import SwiftUI
 
 struct LibraryView: View {
     @EnvironmentObject var contentViewModel: ContentViewModel
+    @EnvironmentObject var trackingViewModel: TrackingViewModel
     @Environment(\.colorScheme) private var colorScheme
 
     @State private var searchText: String = ""
+    @State private var showContinueReading: Bool = false
 
     private let columns = [
         GridItem(.flexible(), spacing: AppConstants.spacingMedium),
@@ -14,94 +16,303 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Static Header with Favourites Button
+                // Static Header
                 GradientHeader(
                     title: "Library",
-                    subtitle: "Your spiritual healing collection",
+                    subtitle: "Words of protection and healing",
+                    style: .plain,
                     trailingContent: {
-                        NavigationLink(destination: FavouritesView()) {
-                            HStack(spacing: 6) {
+                        HStack(spacing: 10) {
+                            NavigationLink(destination: FavouritesView()) {
                                 Image(systemName: "heart.fill")
-                                    .font(.system(size: 14, weight: .medium))
-                                Text("Favourites")
-                                    .font(.poppins(13, weight: .medium))
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primaryGreen)
+                                    .frame(width: 36, height: 36)
+                                    .background(Color.primaryGreen.opacity(0.1))
+                                    .clipShape(Circle())
                             }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 8)
-                            .background(Color.white.opacity(0.2))
-                            .cornerRadius(20)
+
+                            NavigationLink(destination: BookmarksView()) {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(.primaryGreen)
+                                    .frame(width: 36, height: 36)
+                                    .background(Color.primaryGreen.opacity(0.1))
+                                    .clipShape(Circle())
+                            }
                         }
                     }
                 )
 
-                // Scrollable Content
+                ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(spacing: AppConstants.spacingMedium) {
-                        // Search Bar
-                        SearchBar(text: $searchText, placeholder: "Search verses...")
-                            .padding(.horizontal, AppConstants.spacingMedium)
+                VStack(spacing: AppConstants.spacingMedium) {
+                    // Search Bar
+                    SearchBar(text: $searchText, placeholder: "Search verses...")
+                        .padding(.horizontal, AppConstants.spacingMedium)
 
-                        // Welcome Banner
-                        welcomeBanner
-                            .padding(.horizontal, AppConstants.spacingMedium)
-
-                        // Collections Header
-                        if searchText.isEmpty {
-                            Text("Collections")
-                                .font(.headingSmall)
-                                .foregroundColor(.adaptiveText(colorScheme))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .padding(.horizontal, AppConstants.spacingMedium)
+                    // Daily Verse Card
+                    if searchText.isEmpty, let verse = contentViewModel.dailyVerse {
+                        NavigationLink(destination: VerseDetailView(verse: verse)) {
+                            dailyVerseCard(verse: verse)
                         }
-
-                        if contentViewModel.isLoading {
-                            ProgressView()
-                                .frame(height: 200)
-                        } else if !searchText.isEmpty {
-                            searchResultsSection
-                        } else {
-                            collectionsGrid
-                        }
+                        .buttonStyle(.plain)
+                        .bounceOnTap()
+                        .padding(.horizontal, AppConstants.spacingMedium)
                     }
-                    .padding(.top, AppConstants.spacingMedium)
+
+                    // Start Healing Journey Card
+                    if searchText.isEmpty {
+                        healingJourneyCard(proxy: proxy)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                    }
+
+                    // Collections Header
+                    if searchText.isEmpty {
+                        Text("Collections")
+                            .font(.poppins(24, weight: .bold))
+                            .foregroundColor(.adaptiveText(colorScheme))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+                            .padding(.top, AppConstants.spacingSmall)
+                            .id("collections")
+                    }
+
+                    if contentViewModel.isLoading {
+                        ProgressView()
+                            .frame(height: 200)
+                    } else if !searchText.isEmpty {
+                        searchResultsSection
+                    } else {
+                        collectionsGrid
+                    }
                 }
+                .padding(.top, AppConstants.spacingMedium)
+                .padding(.bottom, 80)
+            }
+            .withScrollButtons()
+            }
             }
             .background(Color.adaptiveBackground(colorScheme))
             .ignoresSafeArea(edges: .top)
+            .overlay(alignment: .bottom) {
+                if let lastRead = contentViewModel.lastReadInfo {
+                    Button {
+                        showContinueReading = true
+                    } label: {
+                        HStack(spacing: 10) {
+                            Image(systemName: "book.fill")
+                                .font(.system(size: 14))
+                                .foregroundColor(.primaryGreen)
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Continue Reading")
+                                    .font(.poppins(11, weight: .regular))
+                                    .foregroundColor(.primaryGreen.opacity(0.7))
+                                Text(lastRead.groupDisplayName ?? lastRead.collectionName ?? "")
+                                    .font(.poppins(14, weight: .semibold))
+                                    .foregroundColor(.primaryGreen)
+                                    .lineLimit(1)
+                            }
+
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(.primaryGreen.opacity(0.5))
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 12)
+                        .frame(maxWidth: .infinity)
+                        .background(Color.adaptiveSurface(colorScheme))
+                        .cornerRadius(30)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 30)
+                                .stroke(Color.primaryGreen.opacity(0.3), lineWidth: 1.5)
+                        )
+                        .shadow(color: .black.opacity(0.06), radius: 6, x: 0, y: 3)
+                    }
+                    .padding(.leading, 20)
+                    .padding(.trailing, 62)
+                    .padding(.bottom, 8)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
+            }
+            .fullScreenCover(isPresented: $showContinueReading) {
+                if let lastRead = contentViewModel.lastReadInfo,
+                   let groupName = lastRead.groupName {
+                    if lastRead.mode == "collection",
+                       let collection = contentViewModel.collections.first(where: { $0.id == lastRead.collectionId }) {
+                        CollectionMushafView(collection: collection)
+                    } else {
+                        let verses = contentViewModel.getVersesForGroup(lastRead.collectionId, groupName: groupName)
+                        MushafView(verses: verses)
+                    }
+                }
+            }
         }
     }
 
-    // MARK: - Welcome Banner
-    private var welcomeBanner: some View {
-        HStack(spacing: 16) {
-            Text("Begin your Islamic spiritual healing by recitations of holy verses of the Quran.")
-                .font(.poppins(16, weight: .medium))
-                .foregroundColor(.white)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
+    // MARK: - Time-Based Greeting
+    private var timeBasedGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 3..<12:
+            return "Assalamualaikum, good morning"
+        case 12..<15:
+            return "Assalamualaikum, good afternoon"
+        case 15..<18:
+            return "Assalamualaikum, good evening"
+        case 18..<21:
+            return "Assalamualaikum, have a blessed evening"
+        default:
+            return "Assalamualaikum, peace be upon you"
+        }
+    }
+
+    // MARK: - Healing Journey Card
+    private func healingJourneyCard(proxy: ScrollViewProxy) -> some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(timeBasedGreeting)
+                    .font(.poppins(17, weight: .bold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+
+                Text("Begin your spiritual healing with the words of the Quran.")
+                    .font(.poppins(13, weight: .regular))
+                    .foregroundColor(.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
 
             Spacer()
 
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white.opacity(0.25))
-                    .frame(width: 70, height: 70)
+            Button {
+                withAnimation(.easeInOut(duration: 0.5)) {
+                    proxy.scrollTo("collections", anchor: .top)
+                }
+            } label: {
+                Text("Start Session")
+                    .font(.poppins(13, weight: .semibold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.adaptiveText(colorScheme).opacity(0.3), lineWidth: 1.5)
+                    )
+            }
+        }
+        .padding(AppConstants.spacingMedium)
+        .background(Color.adaptiveMint(colorScheme))
+        .cornerRadius(AppConstants.radiusLarge)
+    }
 
-                Image(systemName: "book.fill")
-                    .font(.system(size: 28, weight: .regular))
-                    .foregroundColor(.white)
+    // MARK: - Daily Verse Card
+    private func dailyVerseCard(verse: RuqyahVerse) -> some View {
+        VStack(spacing: 16) {
+            // Header
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 14, weight: .medium))
+                    Text("Verse of the Day")
+                        .font(.poppins(14, weight: .semibold))
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundColor(.white)
+
+            // Arabic text preview
+            Text(verse.arabicText)
+                .font(.amiriQuran(26))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+
+            // Translation preview
+            Text(verse.translation(for: contentViewModel.language))
+                .font(.poppins(13, weight: .regular))
+                .foregroundColor(.white.opacity(0.9))
+                .lineLimit(3)
+                .multilineTextAlignment(.center)
+
+            // Reference
+            if let reference = verse.reference {
+                Text(reference)
+                    .font(.poppins(12, weight: .medium))
+                    .foregroundColor(.white.opacity(0.65))
             }
         }
         .padding(20)
-        .background(
-            LinearGradient(
-                colors: [Color.primaryGreen, Color.primaryGreenDark],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
+        .background(Color.verseCardGradient)
+        .cornerRadius(20)
+    }
+
+    // MARK: - Continue Reading Card
+    private func continueReadingCard(lastRead: ContentViewModel.LastReadInfo) -> some View {
+        HStack(spacing: 14) {
+            // Book icon
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.primaryGreen.opacity(0.1))
+                    .frame(width: 50, height: 50)
+
+                Image(systemName: "book.fill")
+                    .font(.system(size: 22))
+                    .foregroundColor(.primaryGreen)
+            }
+
+            // Text
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Continue Reading")
+                    .font(.poppins(11, weight: .medium))
+                    .foregroundColor(.primaryGreen)
+
+                Text(lastRead.groupDisplayName ?? lastRead.collectionName)
+                    .font(.poppins(15, weight: .semibold))
+                    .foregroundColor(.adaptiveText(colorScheme))
+                    .lineLimit(1)
+
+                Text(relativeTime(from: lastRead.date))
+                    .font(.poppins(11, weight: .regular))
+                    .foregroundColor(.textSecondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(.primaryGreen.opacity(0.6))
+        }
+        .padding(AppConstants.spacingMedium)
+        .background(Color.adaptiveSurface(colorScheme))
+        .cornerRadius(AppConstants.radiusLarge)
+        .overlay(
+            RoundedRectangle(cornerRadius: AppConstants.radiusLarge)
+                .stroke(Color.primaryGreen.opacity(0.15), lineWidth: 1)
         )
-        .cornerRadius(16)
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
+    }
+
+    private func relativeTime(from date: Date) -> String {
+        let interval = Date().timeIntervalSince(date)
+
+        if interval < 60 {
+            return "Just now"
+        } else if interval < 3600 {
+            let minutes = Int(interval / 60)
+            return "\(minutes) min ago"
+        } else if interval < 86400 {
+            let hours = Int(interval / 3600)
+            return "\(hours)h ago"
+        } else {
+            let days = Int(interval / 86400)
+            return days == 1 ? "Yesterday" : "\(days) days ago"
+        }
     }
 
     // MARK: - Collections Grid
@@ -112,6 +323,7 @@ struct LibraryView: View {
                     CollectionCard(collection: collection)
                 }
                 .buttonStyle(.plain)
+                .bounceOnTap()
             }
         }
         .padding(.horizontal, AppConstants.spacingMedium)
@@ -149,6 +361,7 @@ struct LibraryView: View {
                                 SearchCollectionRow(collection: collection)
                             }
                             .buttonStyle(.plain)
+                            .bounceOnTap()
                         }
                     }
 
@@ -165,6 +378,7 @@ struct LibraryView: View {
                                 SearchGroupRow(group: item.group, collectionName: item.collection.name)
                             }
                             .buttonStyle(.plain)
+                            .bounceOnTap()
                         }
                     }
 
@@ -184,6 +398,7 @@ struct LibraryView: View {
                                 )
                             }
                             .buttonStyle(.plain)
+                            .bounceOnTap()
                         }
                     }
                 }
@@ -293,6 +508,7 @@ struct SearchGroupRow: View {
 #Preview {
     LibraryView()
         .environmentObject(ContentViewModel())
+        .environmentObject(TrackingViewModel())
         .environmentObject(SettingsViewModel())
         .environmentObject(AudioPlayerViewModel())
 }

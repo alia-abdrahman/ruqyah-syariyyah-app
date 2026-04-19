@@ -8,12 +8,14 @@ struct AudioPlayerView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var showSpeedPicker: Bool = false
+    @State private var showRepeatPicker: Bool = false
 
     var body: some View {
         NavigationStack {
+            GeometryReader { geometry in
             VStack(spacing: 0) {
                 // Header
-                ZStack {
+                ZStack(alignment: .bottom) {
                     LinearGradient(
                         colors: [.primaryGreen, .primaryGreenDark],
                         startPoint: .top,
@@ -41,10 +43,10 @@ struct AudioPlayerView: View {
                                     .foregroundColor(.white.opacity(0.8))
                             }
                         }
-                        .padding()
+                        .padding(.bottom, 20)
                     }
                 }
-                .frame(height: 180)
+                .frame(height: 180 + geometry.safeAreaInsets.top)
 
                 // Verse Content
                 ScrollView {
@@ -93,18 +95,23 @@ struct AudioPlayerView: View {
                     }
                     .padding(.horizontal)
 
-                    // Main Controls
-                    HStack(spacing: AppConstants.spacingXLarge) {
-                        // Speed
-                        Button {
-                            showSpeedPicker = true
-                        } label: {
-                            Text("\(String(format: "%.1f", audioPlayerViewModel.playbackSpeed))x")
-                                .font(.bodyMedium)
-                                .foregroundColor(.textSecondary)
-                                .frame(width: 50)
+                    // Repeat Status
+                    if audioPlayerViewModel.repeatCount > 0 {
+                        HStack(spacing: 6) {
+                            Image(systemName: "repeat")
+                                .font(.system(size: 12))
+                            Text("Repeat \(audioPlayerViewModel.currentRepeat + 1) of \(audioPlayerViewModel.repeatCount)")
+                                .font(.poppins(13, weight: .medium))
                         }
+                        .foregroundColor(.primaryGreen)
+                        .padding(.vertical, 6)
+                        .padding(.horizontal, 14)
+                        .background(Color.primaryGreen.opacity(0.1))
+                        .cornerRadius(20)
+                    }
 
+                    // Main Transport Controls
+                    HStack(spacing: AppConstants.spacingXLarge) {
                         // Previous
                         Button {
                             audioPlayerViewModel.playPrevious()
@@ -151,20 +158,49 @@ struct AudioPlayerView: View {
                                 .foregroundColor(audioPlayerViewModel.hasNext ? .adaptiveText(colorScheme) : .textSecondary.opacity(0.3))
                         }
                         .disabled(!audioPlayerViewModel.hasNext)
+                    }
 
-                        // Favorite
-                        if let verse = audioPlayerViewModel.currentVerse {
-                            Button {
-                                Task {
-                                    await contentViewModel.toggleFavorite(verse)
-                                }
-                            } label: {
-                                Image(systemName: contentViewModel.isFavorite(verse) ? "heart.fill" : "heart")
-                                    .font(.title3)
-                                    .foregroundColor(contentViewModel.isFavorite(verse) ? .red : .textSecondary)
+                    // Speed & Repeat Row
+                    HStack {
+                        Button {
+                            showSpeedPicker = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "speedometer")
+                                    .font(.system(size: 14))
+                                Text("\(String(format: "%.1f", audioPlayerViewModel.playbackSpeed))×")
+                                    .font(.poppins(13, weight: .medium))
                             }
+                            .foregroundColor(.textSecondary)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 14)
+                            .background(Color.textSecondary.opacity(0.1))
+                            .cornerRadius(20)
+                        }
+
+                        Spacer()
+
+                        Button {
+                            showRepeatPicker = true
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "repeat")
+                                    .font(.system(size: 14))
+                                Text(audioPlayerViewModel.repeatCount > 0 ? "\(audioPlayerViewModel.repeatCount)×" : "Off")
+                                    .font(.poppins(13, weight: .medium))
+                            }
+                            .foregroundColor(audioPlayerViewModel.repeatCount > 0 ? .primaryGreen : .textSecondary)
+                            .padding(.vertical, 6)
+                            .padding(.horizontal, 14)
+                            .background(
+                                audioPlayerViewModel.repeatCount > 0
+                                    ? Color.primaryGreen.opacity(0.1)
+                                    : Color.textSecondary.opacity(0.1)
+                            )
+                            .cornerRadius(20)
                         }
                     }
+                    .padding(.horizontal)
                     .padding(.bottom, AppConstants.spacingLarge)
                 }
                 .padding()
@@ -172,6 +208,7 @@ struct AudioPlayerView: View {
             }
             .background(Color.adaptiveBackground(colorScheme))
             .ignoresSafeArea(edges: .top)
+            }  // GeometryReader
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
@@ -200,6 +237,15 @@ struct AudioPlayerView: View {
                         audioPlayerViewModel.setPlaybackSpeed(speed)
                     }
                 }
+            }
+            .confirmationDialog("Repeat Verse", isPresented: $showRepeatPicker) {
+                ForEach(AppConstants.repeatCountOptions, id: \.self) { count in
+                    Button(count == 0 ? "Off" : "\(count)×") {
+                        audioPlayerViewModel.setRepeatCount(count)
+                    }
+                }
+            } message: {
+                Text("Auto-repeat this verse during playback")
             }
         }
     }

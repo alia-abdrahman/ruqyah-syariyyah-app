@@ -10,7 +10,8 @@ struct ArticlesView: View {
                 // Static Header
                 GradientHeader(
                     title: "Articles",
-                    subtitle: "Learn and expand your knowledge"
+                    subtitle: "Learn and expand your knowledge",
+                    style: .plain
                 )
 
                 // Scrollable Content
@@ -69,6 +70,7 @@ struct ArticlesView: View {
                                         )
                                     }
                                     .buttonStyle(.plain)
+                                    .bounceOnTap()
                                 }
                             }
                             .padding(.horizontal, AppConstants.spacingMedium)
@@ -77,6 +79,7 @@ struct ArticlesView: View {
                     .padding(.top, AppConstants.spacingMedium)
                     .padding(.bottom, AppConstants.spacingXLarge)
                 }
+                .withScrollButtons()
             }
             .background(Color.adaptiveBackground(colorScheme))
             .ignoresSafeArea(edges: .top)

@@ -30,6 +30,18 @@ struct AppConstants {
     // MARK: - Audio
     static let defaultPlaybackSpeed: Float = 1.0
     static let playbackSpeedOptions: [Float] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
+    static let repeatCountOptions: [Int] = [0, 2, 3, 5, 7, 10]
+
+    /// Groups that are dhikr/dua/selawat without audio recordings
+    static let noAudioGroups: Set<String> = [
+        "Protective Dhikr\nand\nSupplications",
+        "Dhikr for Protection",
+        "Ya Bariu",
+        "Selawat Syifa",
+        "Selawat Tafrijiyyah",
+        "Selawat Munjiyat",
+        "Ruqyah Jibril",
+    ]
 
     // MARK: - Animation Durations
     static let animationDurationShort: Double = 0.2
@@ -47,5 +59,11 @@ struct AppConstants {
         static let textSize = "textSize"
         static let isFirstRun = "isFirstRun"
         static let arabicTextSize = "arabicTextSize"
+        static let lastReadCollectionId = "lastReadCollectionId"
+        static let lastReadGroupName = "lastReadGroupName"
+        static let lastReadCollectionName = "lastReadCollectionName"
+        static let lastReadGroupDisplayName = "lastReadGroupDisplayName"
+        static let lastReadMode = "lastReadMode"
+        static let lastReadDate = "lastReadDate"
     }
 }

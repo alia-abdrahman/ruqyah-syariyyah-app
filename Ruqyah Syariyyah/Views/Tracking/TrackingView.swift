@@ -19,7 +19,8 @@ struct TrackingView: View {
                 // Static Header
                 GradientHeader(
                     title: "Track Your Practice",
-                    subtitle: "Build consistency with daily sessions"
+                    subtitle: trackingSubtitle,
+                    style: .plain
                 )
 
                 // Scrollable Content
@@ -60,6 +61,9 @@ struct TrackingView: View {
                             )
                         }
                         .padding(.horizontal, AppConstants.spacingMedium)
+
+                        // Encouragement Card
+                        encouragementCard
 
                         // Session Controls Section
                         if trackingViewModel.isSessionActive {
@@ -104,7 +108,7 @@ struct TrackingView: View {
                             .padding(AppConstants.spacingLarge)
                             .background(Color.adaptiveSurface(colorScheme))
                             .cornerRadius(AppConstants.radiusLarge)
-                            .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                            .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
                             .padding(.horizontal, AppConstants.spacingMedium)
                             .padding(.top, AppConstants.spacingMedium)
                         } else {
@@ -150,7 +154,7 @@ struct TrackingView: View {
                                     )
                                 )
                                 .cornerRadius(16)
-                                .shadow(color: .primaryGreen.opacity(0.4), radius: 8, x: 0, y: 4)
+                                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 4)
                             }
                             .padding(.horizontal, AppConstants.spacingMedium)
                             .padding(.top, AppConstants.spacingMedium)
@@ -189,9 +193,159 @@ struct TrackingView: View {
             }
             .background(Color.adaptiveBackground(colorScheme))
             .ignoresSafeArea(edges: .top)
+            .overlay {
+                if trackingViewModel.showSessionComplete {
+                    sessionCompleteOverlay
+                        .transition(.opacity.combined(with: .scale(scale: 0.9)))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                withAnimation(.easeOut(duration: 0.4)) {
+                                    trackingViewModel.showSessionComplete = false
+                                }
+                            }
+                        }
+                }
+            }
+            .animation(.spring(response: 0.5, dampingFraction: 0.8), value: trackingViewModel.showSessionComplete)
             .sheet(isPresented: $showStartSession) {
                 startSessionSheet
             }
+        }
+    }
+
+    // MARK: - Contextual Subtitle
+    private var trackingSubtitle: String {
+        let streak = trackingViewModel.currentStreak
+        let total = trackingViewModel.totalSessions
+
+        if total == 0 {
+            return "Begin your spiritual practice journey"
+        } else if streak >= 7 {
+            return "MashaAllah! \(streak)-day streak"
+        } else if streak >= 1 {
+            return "\(streak)-day streak — keep it going!"
+        } else {
+            return "Every session is a step forward"
+        }
+    }
+
+    // MARK: - Encouragement Card
+    private var encouragementCard: some View {
+        let streak = trackingViewModel.currentStreak
+        let totalSessions = trackingViewModel.totalSessions
+
+        let (message, icon, color): (String, String, Color) = {
+            if totalSessions == 0 {
+                return (
+                    "Start your first session to begin tracking your spiritual practice. Bismillah!",
+                    "leaf.fill",
+                    .primaryGreen
+                )
+            } else if streak == 0 {
+                return (
+                    "No streak yet — and that is perfectly okay. Start a session today and build from here, one day at a time.",
+                    "sunrise.fill",
+                    .accentGold
+                )
+            } else if streak < 3 {
+                return (
+                    "You are building momentum! \(streak) day\(streak == 1 ? "" : "s") so far. Come back tomorrow to keep your streak alive.",
+                    "figure.walk",
+                    .accentBlue
+                )
+            } else if streak < 7 {
+                return (
+                    "SubhanAllah, \(streak) consecutive days! You are building a beautiful habit of spiritual healing.",
+                    "flame.fill",
+                    .accentGold
+                )
+            } else {
+                return (
+                    "MashaAllah, \(streak) days of consistent practice! Your dedication is truly remarkable. May it bring you barakah.",
+                    "star.fill",
+                    .accentGold
+                )
+            }
+        }()
+
+        return HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 24))
+                .foregroundColor(color)
+                .frame(width: 40)
+
+            Text(message)
+                .font(.poppins(13, weight: .regular))
+                .foregroundColor(.adaptiveText(colorScheme))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(AppConstants.spacingMedium)
+        .background(color.opacity(0.08))
+        .cornerRadius(AppConstants.radiusMedium)
+        .padding(.horizontal, AppConstants.spacingMedium)
+    }
+
+    // MARK: - Session Complete Overlay
+    private var sessionCompleteOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    withAnimation {
+                        trackingViewModel.showSessionComplete = false
+                    }
+                }
+
+            VStack(spacing: 20) {
+                ZStack {
+                    Circle()
+                        .fill(Color.primaryGreen.opacity(0.15))
+                        .frame(width: 100, height: 100)
+
+                    Circle()
+                        .fill(Color.primaryGreen)
+                        .frame(width: 72, height: 72)
+
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(.white)
+                }
+
+                Text("Session Complete!")
+                    .font(.headingSmall)
+                    .foregroundColor(.adaptiveText(colorScheme))
+
+                Text(trackingViewModel.completionMessage)
+                    .font(.poppins(14, weight: .regular))
+                    .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 20)
+
+                Text(trackingViewModel.lastCompletedDuration.shortDurationFormatted)
+                    .font(.poppins(28, weight: .bold))
+                    .foregroundColor(.primaryGreen)
+
+                Button {
+                    withAnimation {
+                        trackingViewModel.showSessionComplete = false
+                    }
+                } label: {
+                    Text("Continue")
+                        .font(.button)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Color.primaryGreen)
+                        .cornerRadius(AppConstants.radiusMedium)
+                }
+                .padding(.horizontal, 20)
+            }
+            .padding(AppConstants.spacingLarge)
+            .padding(.vertical, 10)
+            .background(Color.adaptiveSurface(colorScheme))
+            .cornerRadius(AppConstants.radiusXLarge)
+            .shadow(color: .black.opacity(0.1), radius: 20)
+            .padding(.horizontal, 40)
         }
     }
 

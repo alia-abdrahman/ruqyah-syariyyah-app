@@ -5,6 +5,7 @@ struct VerseCard: View {
     let isFavorite: Bool
     let language: Language
     var isPlaying: Bool = false
+    var showPlayButton: Bool = true
     var showActions: Bool = true
     var onFavoriteToggle: (() -> Void)?
     var onPlay: (() -> Void)?
@@ -13,12 +14,20 @@ struct VerseCard: View {
     @Environment(\.colorScheme) private var colorScheme
     @EnvironmentObject var settingsViewModel: SettingsViewModel
     @State private var animatePlay: Bool = false
+    @State private var animateHeart: Bool = false
 
     var body: some View {
         VStack(alignment: .trailing, spacing: AppConstants.spacingMedium) {
             // Arabic Text
             HStack {
-                if let number = verse.verseNumber {
+                if let reps = verse.recommendedRepetitions {
+                    Text("×\(reps)")
+                        .font(.poppins(12, weight: .bold))
+                        .foregroundColor(.primaryGreen)
+                        .frame(width: 35, height: 35)
+                        .background(Color.primaryGreen.opacity(0.1))
+                        .clipShape(Circle())
+                } else if let number = verse.verseNumber {
                     Text(number.arabicToWesternNumerals)
                         .font(.poppins(13, weight: .semibold))
                         .foregroundColor(.primaryGreen)
@@ -58,8 +67,8 @@ struct VerseCard: View {
                 HStack(spacing: AppConstants.spacingMedium) {
                     Spacer()
 
-                    // Show play button if verse has local audio or reference (for API audio)
-                    if verse.audioPath != nil || verse.reference != nil {
+                    // Show play button if allowed and verse has local audio or reference (for API audio)
+                    if showPlayButton && (verse.audioPath != nil || verse.reference != nil) {
                         Button {
                             withAnimation(.easeInOut(duration: 0.15)) {
                                 animatePlay = true
@@ -94,11 +103,20 @@ struct VerseCard: View {
                     }
 
                     Button {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                            animateHeart = true
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            withAnimation(.spring(response: 0.2, dampingFraction: 0.6)) {
+                                animateHeart = false
+                            }
+                        }
                         onFavoriteToggle?()
                     } label: {
                         Image(systemName: isFavorite ? "heart.fill" : "heart")
                             .font(.title2)
                             .foregroundColor(isFavorite ? .red : .textSecondary)
+                            .scaleEffect(animateHeart ? 1.3 : 1.0)
                     }
 
                     Button {
@@ -114,7 +132,7 @@ struct VerseCard: View {
         .padding(AppConstants.spacingMedium)
         .background(Color.adaptiveSurface(colorScheme))
         .cornerRadius(AppConstants.radiusLarge)
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.06), radius: 5, x: 0, y: 3)
     }
 }
 
