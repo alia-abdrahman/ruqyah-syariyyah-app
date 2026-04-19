@@ -7,6 +7,10 @@ struct LibraryView: View {
 
     @State private var searchText: String = ""
     @State private var showContinueReading: Bool = false
+    @State private var showCoffeeBanner: Bool = false
+
+    // Show once per app session
+    private static var hasShownCoffeeBanner: Bool = false
 
     private let columns = [
         GridItem(.flexible(), spacing: AppConstants.spacingMedium),
@@ -47,6 +51,43 @@ struct LibraryView: View {
                 ScrollViewReader { proxy in
                 ScrollView {
                 VStack(spacing: AppConstants.spacingMedium) {
+                    // Buy Me a Coffee Banner
+                    if showCoffeeBanner {
+                        Link(destination: URL(string: "https://buymeacoffee.com/codedancoffee")!) {
+                            HStack(spacing: 10) {
+                                Text("☕")
+                                    .font(.system(size: 20))
+
+                                Text("If you love this app, buy me a coffee!")
+                                    .font(.poppins(13, weight: .medium))
+                                    .foregroundColor(.white)
+                                    .lineLimit(1)
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(.white.opacity(0.6))
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color(red: 0.6, green: 0.4, blue: 0.2), Color(red: 0.45, green: 0.28, blue: 0.12)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .cornerRadius(30)
+                            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
+                        }
+                        .padding(.horizontal, AppConstants.spacingMedium)
+                        .transition(.asymmetric(
+                            insertion: .move(edge: .top).combined(with: .opacity),
+                            removal: .opacity
+                        ))
+                    }
+
                     // Search Bar
                     SearchBar(text: $searchText, placeholder: "Search verses...")
                         .padding(.horizontal, AppConstants.spacingMedium)
@@ -95,6 +136,19 @@ struct LibraryView: View {
             }
             .background(Color.adaptiveBackground(colorScheme))
             .ignoresSafeArea(edges: .top)
+            .onAppear {
+                if !LibraryView.hasShownCoffeeBanner {
+                    LibraryView.hasShownCoffeeBanner = true
+                    withAnimation(.easeOut(duration: 0.4).delay(1.0)) {
+                        showCoffeeBanner = true
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 9.0) {
+                        withAnimation(.easeIn(duration: 0.3)) {
+                            showCoffeeBanner = false
+                        }
+                    }
+                }
+            }
             .overlay(alignment: .bottom) {
                 if let lastRead = contentViewModel.lastReadInfo {
                     Button {
