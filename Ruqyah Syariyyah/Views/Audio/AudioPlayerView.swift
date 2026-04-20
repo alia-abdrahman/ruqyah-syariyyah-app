@@ -36,6 +36,7 @@ struct AudioPlayerView: View {
                             Text(verse.group)
                                 .font(.headingSmall)
                                 .foregroundColor(.white)
+                                .multilineTextAlignment(.center)
 
                             if let reference = verse.reference {
                                 Text(reference)
