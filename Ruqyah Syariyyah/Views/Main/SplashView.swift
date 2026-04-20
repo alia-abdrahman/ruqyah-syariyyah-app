@@ -2,48 +2,67 @@ import SwiftUI
 
 struct SplashView: View {
     @Binding var isActive: Bool
+    @Environment(\.colorScheme) private var colorScheme
 
-    @State private var opacity: Double = 0
-    @State private var scale: CGFloat = 0.92
+    @State private var bismillahOpacity: Double = 0
+    @State private var bismillahScale: CGFloat = 0.9
+    @State private var brandingOpacity: Double = 0
 
     var body: some View {
         ZStack {
-            // Clean pastel green background
+            // Soft mint green background
             Color(red: 0.933, green: 0.965, blue: 0.945)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                // App Icon
-                Image("SplashIcon")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 140, height: 140)
-                    .clipShape(RoundedRectangle(cornerRadius: 32))
-                    .shadow(color: .black.opacity(0.08), radius: 16, x: 0, y: 6)
+            // Bismillah — center of screen
+            Text("بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ")
+                .font(.amiriQuran(32))
+                .foregroundColor(Color(hex: "2D6A4F"))
+                .multilineTextAlignment(.center)
+                .scaleEffect(bismillahScale)
+                .opacity(bismillahOpacity)
 
-                // App Name
-                Text("MyRuqyah")
-                    .font(.poppins(22, weight: .semibold))
-                    .foregroundColor(Color(hex: "2D6A4F"))
+            // Branding — bottom
+            VStack(spacing: 8) {
+                Spacer()
+
+                HStack(spacing: 8) {
+                    Image("SplashIcon")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 36, height: 36)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+
+                    Text("MyRuqyah")
+                        .font(.poppins(16, weight: .medium))
+                        .foregroundColor(Color(hex: "2D6A4F"))
+                }
+                .padding(.bottom, 50)
             }
-            .scaleEffect(scale)
-            .opacity(opacity)
+            .opacity(brandingOpacity)
         }
         .onAppear {
-            // Smooth fade-in + subtle scale
-            withAnimation(.easeOut(duration: 0.6)) {
-                opacity = 1.0
-                scale = 1.0
+            // Bismillah fades in with subtle scale
+            withAnimation(.easeOut(duration: 0.8)) {
+                bismillahOpacity = 1.0
+                bismillahScale = 1.0
             }
 
-            // Fade out and dismiss
+            // Branding fades in after a short delay
+            withAnimation(.easeOut(duration: 0.6).delay(0.5)) {
+                brandingOpacity = 1.0
+            }
+
+            // Fade out everything
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
                 withAnimation(.easeIn(duration: 0.4)) {
-                    opacity = 0
-                    scale = 1.04
+                    bismillahOpacity = 0
+                    bismillahScale = 1.05
+                    brandingOpacity = 0
                 }
             }
 
+            // Dismiss
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
                 isActive = false
             }
