@@ -35,7 +35,6 @@ struct BookmarksView: View {
                                 bookmarkRow(bookmark)
                             }
                             .buttonStyle(.plain)
-                            .bounceOnTap()
                             .contextMenu {
                                 Button(role: .destructive) {
                                     Task {

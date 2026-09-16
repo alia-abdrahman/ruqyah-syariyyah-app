@@ -208,14 +208,35 @@ private struct MushafSurahSection: View {
         hasBismillah ? Array(verses.dropFirst()) : verses
     }
 
+    /// Recitation count for the header pill — only when every verse in the group shares the same count.
+    /// Mixed-count groups show a per-verse marker in the text flow instead.
+    private var uniformRepetitions: Int? {
+        let counts = verses.map(\.recommendedRepetitions)
+        guard let first = counts.first, let value = first,
+              counts.allSatisfy({ $0 == value }) else { return nil }
+        return value
+    }
+
     var body: some View {
         VStack(spacing: AppConstants.spacingMedium) {
             // Surah Title Header with Bookmark
             HStack {
                 Spacer()
-                Text(groupName)
-                    .font(.poppins(20, weight: .bold))
-                    .foregroundColor(.primaryGreen)
+                VStack(spacing: 6) {
+                    Text(groupName)
+                        .font(.poppins(20, weight: .bold))
+                        .foregroundColor(.primaryGreen)
+
+                    if let reps = uniformRepetitions {
+                        Text("Recite \(reps)\u{00D7}")
+                            .font(.poppins(12, weight: .semibold))
+                            .foregroundColor(.primaryGreen)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 3)
+                            .background(Color.primaryGreen.opacity(0.12))
+                            .clipShape(Capsule())
+                    }
+                }
                 Spacer()
                 Button {
                     onBookmarkToggle()
@@ -317,6 +338,15 @@ private struct MushafSurahSection: View {
 
             fullText.append(verseText)
             fullText.append(verseNumberText)
+
+            // Per-verse recitation count for mixed-count groups (header pill covers uniform ones)
+            if uniformRepetitions == nil, let reps = verse.recommendedRepetitions {
+                var repMarker = AttributedString(" ×\(toArabicNumeral(reps))")
+                repMarker.font = .poppins(15, weight: .semibold)
+                repMarker.foregroundColor = isCurrentVerse ? Color.primaryGreen : Color.primaryGreen.opacity(0.7)
+                fullText.append(repMarker)
+            }
+
             if index < versesToRender.count - 1 {
                 fullText.append(spacing)
             }

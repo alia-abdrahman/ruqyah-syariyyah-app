@@ -70,7 +70,6 @@ struct ArticlesView: View {
                                         )
                                     }
                                     .buttonStyle(.plain)
-                                    .bounceOnTap()
                                 }
                             }
                             .padding(.horizontal, AppConstants.spacingMedium)

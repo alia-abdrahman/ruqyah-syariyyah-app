@@ -92,7 +92,6 @@ struct CollectionDetailView: View {
                             GroupRowView(group: group, index: index + 1)
                         }
                         .buttonStyle(.plain)
-                        .bounceOnTap()
                     }
 
                     // End of list

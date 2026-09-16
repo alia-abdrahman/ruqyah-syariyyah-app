@@ -25,9 +25,12 @@ extension Font {
         return .system(size: size, weight: weight)
     }
 
-    // MARK: - Arabic Font (Amiri Quran)
+    // MARK: - Arabic Font (KFGQPC Uthmanic Script HAFS)
     static func amiriQuran(_ size: CGFloat) -> Font {
-        // Try custom font, fall back to system if not available
+        // KFGQPC Uthmanic Script HAFS (King Fahd Complex), fall back to Amiri Quran, then system
+        if UIFont(name: "KFGQPCUthmanicScriptHAFS", size: size) != nil {
+            return .custom("KFGQPCUthmanicScriptHAFS", size: size)
+        }
         if UIFont(name: "AmiriQuran-Regular", size: size) != nil {
             return .custom("AmiriQuran-Regular", size: size)
         }

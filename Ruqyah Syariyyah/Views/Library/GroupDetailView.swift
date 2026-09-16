@@ -88,7 +88,6 @@ struct GroupDetailView: View {
                             )
                         }
                         .buttonStyle(.plain)
-                        .bounceOnTap()
                     }
 
                     // End of list
