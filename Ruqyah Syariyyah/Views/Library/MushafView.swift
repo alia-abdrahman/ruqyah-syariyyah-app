@@ -94,9 +94,21 @@ struct MushafView: View {
                             // Title Card with Bookmark
                             HStack {
                                 Spacer()
-                                Text(groupName)
-                                    .font(.poppins(20, weight: .bold))
-                                    .foregroundColor(.primaryGreen)
+                                VStack(spacing: 6) {
+                                    Text(groupName)
+                                        .font(.poppins(20, weight: .bold))
+                                        .foregroundColor(.primaryGreen)
+
+                                    if let reps = uniformRepetitions {
+                                        Text("Recite \(reps)\u{00D7}")
+                                            .font(.poppins(12, weight: .semibold))
+                                            .foregroundColor(.primaryGreen)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 3)
+                                            .background(Color.primaryGreen.opacity(0.12))
+                                            .clipShape(Capsule())
+                                    }
+                                }
                                 Spacer()
                                 Button {
                                     Task {
@@ -197,13 +209,27 @@ struct MushafView: View {
         audioPlayerViewModel.playVerse(verses[0])
     }
 
+    /// Recitation count for the header pill — only when every verse in the group shares the same count.
+    /// Mixed-count groups show a per-verse marker in the text flow instead.
+    private var uniformRepetitions: Int? {
+        let counts = verses.map(\.recommendedRepetitions)
+        guard let first = counts.first, let value = first,
+              counts.allSatisfy({ $0 == value }) else { return nil }
+        return value
+    }
+
     // MARK: - Combined Arabic Text with Verse Numbers
     private var combinedArabicText: some View {
         // Build attributed text with verse numbers (excluding Bismillah if separated)
         let combinedText = mushafVerses.enumerated().map { index, verse in
             let offset = hasBismillah ? index + 2 : index + 1
             let verseNumber = verse.verseNumber ?? toArabicNumeral(offset)
-            return "\(verse.arabicText) ﴿\(verseNumber)﴾"
+            var verseString = "\(verse.arabicText) ﴿\(verseNumber)﴾"
+            // Per-verse recitation count for mixed-count groups (header pill covers uniform ones)
+            if uniformRepetitions == nil, let reps = verse.recommendedRepetitions {
+                verseString += " ×\(toArabicNumeral(reps))"
+            }
+            return verseString
         }.joined(separator: " ")
 
         return Text(combinedText)

@@ -41,37 +41,6 @@ struct CollectionCard: View {
     }
 }
 
-// MARK: - Bounce on Tap Modifier
-struct BounceModifier: ViewModifier {
-    @State private var isPressed = false
-
-    func body(content: Content) -> some View {
-        content
-            .scaleEffect(isPressed ? 0.92 : 1.0)
-            .animation(
-                isPressed
-                    ? .easeIn(duration: 0.08)
-                    : .spring(response: 0.35, dampingFraction: 0.4),
-                value: isPressed
-            )
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        if !isPressed { isPressed = true }
-                    }
-                    .onEnded { _ in
-                        isPressed = false
-                    }
-            )
-    }
-}
-
-extension View {
-    func bounceOnTap() -> some View {
-        modifier(BounceModifier())
-    }
-}
-
 // MARK: - Press Effect Button Style
 struct PressEffectButtonStyle: ButtonStyle {
     var pressedScale: CGFloat = 0.92

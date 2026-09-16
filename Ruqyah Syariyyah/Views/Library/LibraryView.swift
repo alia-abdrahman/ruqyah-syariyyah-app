@@ -98,13 +98,18 @@ struct LibraryView: View {
                             dailyVerseCard(verse: verse)
                         }
                         .buttonStyle(.plain)
-                        .bounceOnTap()
                         .padding(.horizontal, AppConstants.spacingMedium)
                     }
 
                     // Start Healing Journey Card
                     if searchText.isEmpty {
                         healingJourneyCard(proxy: proxy)
+                            .padding(.horizontal, AppConstants.spacingMedium)
+
+                        Image("GreetingIllustration")
+                            .resizable()
+                            .scaledToFit()
+                            .cornerRadius(AppConstants.radiusLarge)
                             .padding(.horizontal, AppConstants.spacingMedium)
                     }
 
@@ -377,7 +382,6 @@ struct LibraryView: View {
                     CollectionCard(collection: collection)
                 }
                 .buttonStyle(.plain)
-                .bounceOnTap()
             }
         }
         .padding(.horizontal, AppConstants.spacingMedium)
@@ -415,7 +419,6 @@ struct LibraryView: View {
                                 SearchCollectionRow(collection: collection)
                             }
                             .buttonStyle(.plain)
-                            .bounceOnTap()
                         }
                     }
 
@@ -432,7 +435,6 @@ struct LibraryView: View {
                                 SearchGroupRow(group: item.group, collectionName: item.collection.name)
                             }
                             .buttonStyle(.plain)
-                            .bounceOnTap()
                         }
                     }
 
@@ -452,7 +454,6 @@ struct LibraryView: View {
                                 )
                             }
                             .buttonStyle(.plain)
-                            .bounceOnTap()
                         }
                     }
                 }
